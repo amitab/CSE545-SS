@@ -27,13 +27,13 @@
 						<div class="form-group">
 							<label for="uname"><b>Username</b></label> <input type="text"
 								placeholder="Enter Username" id="userName" name="username"  
-								maxlength="30" minlength="2"
+								maxlength="30" minlength="5"
 								required>
 						</div>
 						<div class="form-group">
 							<label for="psw"><b>Password</b></label> <input type="password"
 								placeholder="Enter Password" id="password" name="password" 
-								maxlength="50" minlength="2"
+								maxlength="30" minlength="8"
 								required>
 						</div>
 						<div class="form-group">
