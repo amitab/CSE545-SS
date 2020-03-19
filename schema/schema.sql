@@ -87,3 +87,53 @@ CREATE TABLE `secure_banking_system`.`login_history` (
   device_type VARCHAR(25) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES `secure_banking_system`.`user`(id)
 );
+
+DELIMITER $$
+
+CREATE PROCEDURE `secure_banking_system`.`create_user_transaction` (
+	IN transfer_type ENUM('cc', 'debit', 'transfer'),
+	IN from_username VARCHAR(255),
+	IN from_account INT,
+	IN to_account INT,
+	IN amount DECIMAL,
+	OUT status INT)
+BEGIN
+	DECLARE total_amount_transferred_today DECIMAL(30, 5) DEFAULT 0;
+	DECLARE user_count INT;
+	DECLARE trigger_user_id INT;
+
+	SELECT IFNULL(SUM(amount), 0) 
+		INTO total_amount_transferred_today 
+		FROM `secure_banking_system`.`transaction` AS t 
+		WHERE t.from_account = from_account
+			AND DATE(t.requested_date) = CURDATE();
+
+	SELECT COUNT(*) INTO user_count
+		FROM `secure_banking_system`.`account` AS a JOIN `secure_banking_system`.`user` AS u ON a.user_id = u.id
+		WHERE (a.id = from_account AND u.username = from_username AND u.status = 1) OR (a.id = to_account AND u.status = 1);
+
+	SELECT id INTO trigger_user_id
+		FROM `secure_banking_system`.`user`
+		WHERE username = from_username;
+
+	IF user_count != 2 THEN
+		SET status = 3;
+	ELSEIF (total_amount_transferred_today + amount > 1000.0) THEN
+		INSERT INTO `secure_banking_system`.`transaction` (transaction_type, approval_status, amount, is_critical_transaction, from_account, to_account)
+			VALUES(transfer_type, FALSE, amount, TRUE, from_account, to_account);
+
+		INSERT INTO `secure_banking_system`.`request` (requested_by, request_id, type_of_request, approval_level_required)
+		  VALUES(trigger_user_id, LAST_INSERT_ID(), "transaction", "tier2");
+		SET status = 1;
+	ELSEIF (SELECT IFNULL(current_balance, 0) FROM `secure_banking_system`.`account` WHERE id = from_account) < amount THEN
+		SET status = 2;
+	ELSE
+		INSERT INTO `secure_banking_system`.`transaction` (transaction_type, approval_status, amount, is_critical_transaction, from_account, to_account)
+			VALUES(transfer_type, FALSE, amount, FALSE, from_account, to_account);
+		INSERT INTO `secure_banking_system`.`request` (requested_by, request_id, type_of_request, approval_level_required)
+		  VALUES(trigger_user_id, LAST_INSERT_ID(), "transaction", "tier1");
+		SET status = 0;
+	END IF;
+END$$
+
+DELIMITER ;
