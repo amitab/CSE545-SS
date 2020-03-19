@@ -6,7 +6,7 @@ USE secure_banking_system;
 
 CREATE TABLE `secure_banking_system`.`user` (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  username VARCHAR(255) NOT NULL,
+  username VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(60) NOT NULL,
   status INT NOT NULL,
   incorrect_attempts INT DEFAULT 0,
