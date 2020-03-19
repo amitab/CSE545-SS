@@ -35,10 +35,10 @@ public class Tier2Actions{
 		System.out.println("ACC NUMEBER  "+accNumber);
 		
 		Authentication x = SecurityContextHolder.getContext().getAuthentication();
-		if (x == null || !x.isAuthenticated()) {
-			System.out.println("NOT AUTHENTICATED");
-			return new ModelAndView("Login");
-		}
+//		if (x == null || !x.isAuthenticated()) {
+//			System.out.println("NOT AUTHENTICATED");
+//			return new ModelAndView("Login");
+//		}
 		Boolean isTier2=false;
 		for (GrantedAuthority grantedAuthority : x.getAuthorities()) {
 			  System.out.println(grantedAuthority.getAuthority());
