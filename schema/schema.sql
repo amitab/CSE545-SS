@@ -87,7 +87,6 @@ CREATE TABLE `secure_banking_system`.`login_history` (
   device_type VARCHAR(25) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES `secure_banking_system`.`user`(id)
 );
-<<<<<<< HEAD
 
 DELIMITER $$
 
@@ -138,5 +137,3 @@ BEGIN
 END$$
 
 DELIMITER ;
-=======
->>>>>>> Update schema
