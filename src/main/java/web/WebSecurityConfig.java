@@ -16,21 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
-class PlainText implements PasswordEncoder {
-
-	@Override
-	public String encode(CharSequence rawPassword) {
-		// TODO Auto-generated method stub
-		return rawPassword.toString();
-	}
-
-	@Override
-	public boolean matches(CharSequence rawPassword, String encodedPassword) {
-		return encodedPassword.contentEquals(rawPassword);
-	}
-	
-}
-
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -46,12 +31,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
     	 auth.userDetailsService(userDetailsService);
-//        auth.inMemoryAuthentication()
-//        .withUser("user1").password(passwordEncoder().encode("user1Pass")).roles("USER")
-//        .and()
-//        .withUser("user2").password(passwordEncoder().encode("user2Pass")).roles("USER")
-//        .and()
-//        .withUser("admin").password(passwordEncoder().encode("adminPass")).roles("ADMIN");
     }
 
     
@@ -81,6 +60,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	        .antMatchers("/Appointment").permitAll()
 	        .antMatchers("/AppointmentCreate").permitAll()
 	        .antMatchers("/Download").permitAll()
+	        .antMatchers("/forgot_password").permitAll()
+	        .antMatchers("/reset_password").permitAll()
+	        .antMatchers("/change_password").hasAuthority("CHANGE_PASSWORD_PRIVILEGE")
 	        .antMatchers("/Tier1Dashboard").hasAuthority("tier1")
 	        .antMatchers("/Tier1PendingTransactions").hasAuthority("tier1")
 	        .antMatchers("/Tier1UpdatePassword").hasAuthority("tier1")
@@ -93,6 +75,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	        .antMatchers("/EmployeeUpdate").hasAuthority("admin")
 	        .antMatchers("/EmployeeDelete").hasAuthority("admin")
 	        .antMatchers("/SystemLogs").hasAuthority("admin")
+	        .antMatchers("/homepage").hasAuthority("customer")
 	        .anyRequest().authenticated()//any other request just need authentication
 	        .and()
 	        .formLogin()
@@ -100,8 +83,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	        .loginProcessingUrl("/process_login")
 	        .successHandler(myAuthenticationSuccessHandler())
 	        .failureHandler(customAuthenticationFailureHandler())
-		//    .defaultSuccessUrl("/homepage", true)
-	    //    .failureUrl("/login?error=true")
 		    .and()
 		    .logout()
 		    .logoutUrl("/perform_logout")
