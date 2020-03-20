@@ -93,6 +93,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	        .antMatchers("/Tier2SearchAccount").hasAuthority("tier2")
 	        .antMatchers("/Tier2DeleteAccount").hasAuthority("tier2")
 	        .antMatchers("/Tier2Search").hasAuthority("tier2")
+	        .antMatchers("/Tier2PendingAccountView").hasAuthority("tier2")  
+	        .antMatchers("/Tier2AuthAcc").hasAuthority("tier2")
+			.antMatchers("/Tier2DecAcc").hasAuthority("tier2")
 	        .anyRequest().authenticated()//any other request just need authentication
 	        .and()
 	        .formLogin()
