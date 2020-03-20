@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
-public class Tier2Dashboard {
+public class Tier2DashboardController {
 	
 	
 	@RequestMapping("/Tier2Dashboard")

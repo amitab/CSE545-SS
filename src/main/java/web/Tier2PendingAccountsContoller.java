@@ -31,7 +31,7 @@ import model.User;
 
 
 @Controller
-public class Tier2PendingAccounts{
+public class Tier2PendingAccountsContoller{
 	
 	
 	@RequestMapping("/Tier2PendingAccountView")

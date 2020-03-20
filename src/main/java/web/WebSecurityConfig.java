@@ -96,6 +96,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	        .antMatchers("/Tier2PendingAccountView").hasAuthority("tier2")  
 	        .antMatchers("/Tier2AuthAcc").hasAuthority("tier2")
 			.antMatchers("/Tier2DecAcc").hasAuthority("tier2")
+			.antMatchers("/Tier2DelAcc").hasAuthority("tier2")
 	        .antMatchers("/AdminDashboard").hasAuthority("admin")
 	        .antMatchers("/EmployeeView").hasAuthority("admin")
 	        .antMatchers("/EmployeeInsert").hasAuthority("admin")
