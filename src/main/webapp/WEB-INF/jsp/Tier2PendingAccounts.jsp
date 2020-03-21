@@ -42,7 +42,7 @@
 				    			Pending
 				    		</td>
 				    		<td>
-				    		<form method="post" action="/Tier2AuthAcc" id="authorize">
+				    		<form method="post" action="/Tier2/AuthAcc" id="authorize">
 				    		<input type="hidden" name="accountnumber" id="accountnumber" value="${search.accountNumber}">
 				    		<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
 				    		<input type="submit" value="Authorize">
@@ -50,7 +50,7 @@
 				    		</td>
 				    		
 				    		<td>
-				    		<form method="post" action="/Tier2DecAcc" id="decline">
+				    		<form method="post" action="/Tier2/DecAcc" id="decline">
 				    		<input type="hidden" name="accountnumber" id="accountnumber" value="${search.accountNumber}">
 				    		<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
 				    		 

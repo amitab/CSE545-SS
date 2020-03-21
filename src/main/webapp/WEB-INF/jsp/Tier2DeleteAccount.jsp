@@ -13,7 +13,7 @@
 				<h3> <b>DELETE</b> Account </h3>
 			</div>
 			<div>
-				<form id="DeleteAccount" action="/Tier2DelAcc" method="post" class="form-horizontal">
+				<form id="DeleteAccount" action="/Tier2/DelAcc" method="post" class="form-horizontal">
 					<fieldset>
 						<div>
 							<label for="accountnumber" class="col-lg-2 control-label"> <b>Account #</b></label>

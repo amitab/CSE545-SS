@@ -49,7 +49,6 @@ public class AccountServicesImpl {
 		
 		Session s = SessionManager.getSession("");
 		List<Account> account=null;
-		System.out.println("Came here");
 		account=s.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class)
 				.setParameter("accountNumber", accNumber).getResultList();
 		
@@ -87,7 +86,6 @@ public class AccountServicesImpl {
 		
 		Session s = SessionManager.getSession("");
 		List<Account> account=null;
-		System.out.println("Came here");
 		account=s.createQuery("FROM Account WHERE account_number = :accountNumber AND status=1", Account.class)
 				.setParameter("accountNumber", accNumber).getResultList();
 		if(account.size()==0)
@@ -170,7 +168,6 @@ public class AccountServicesImpl {
 
 		Session s = SessionManager.getSession("");
 		List<Account> account=null;
-		System.out.println("Came here");
 		account=s.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class)
 				.setParameter("accountNumber", accNumber).getResultList();
 		//ArrayList<Search> search=new ArrayList<>()
@@ -232,7 +229,6 @@ public class AccountServicesImpl {
 
 		Session s = SessionManager.getSession("");
 		List<Account> account=null;
-		System.out.println("Came here");
 		account=s.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class)
 				.setParameter("accountNumber", accNumber).getResultList();
 		//ArrayList<Search> search=new ArrayList<>()
