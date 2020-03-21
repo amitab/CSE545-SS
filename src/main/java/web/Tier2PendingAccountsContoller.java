@@ -37,49 +37,15 @@ public class Tier2PendingAccountsContoller{
 	@RequestMapping("/Tier2PendingAccountView")
     public ModelAndView retrievePendingAccounts(Model model) {
 		
-		Authentication x = SecurityContextHolder.getContext().getAuthentication();
-//		if (x == null || !x.isAuthenticated()) {
-//			System.out.println("NOT AUTHENTICATED");
-//			return new ModelAndView("Login");
-//		}
-		Boolean isTier2=false;
-		for (GrantedAuthority grantedAuthority : x.getAuthorities()) {
-			  System.out.println(grantedAuthority.getAuthority());
-			    if (grantedAuthority.getAuthority().equals("tier2")) {
-			    	System.out.println("Tier 2 Success");
-			        isTier2 = true;
-			        break;
-			    }
-			}
-		if(isTier2)
-		{
-		Session s = SessionManager.getSession("");
-		List<Account> account=null;
-		account=s.createQuery("FROM Account where status=0", Account.class)
-				 .getResultList();
 		
+		AccountServicesImpl accountServicesImpl = new AccountServicesImpl();
 		
-		SearchForm searchForm = new SearchForm();
-		//ArrayList<Search> search=new ArrayList<>();
-		List<Search> search = new ArrayList<Search>();
-		for(Account temp : account )
-		{
-			Boolean status=false;
-			if(temp.getStatus()==1)
-				status=true;
-			Search tempSearch=new Search(temp.getAccountNumber(),temp.getCurrentBalance()+"",status);
-			
-			if(temp.getUser().getRole().equals("customer"))
-			search.add(tempSearch);
-			
-		}
-		searchForm.setSearchs(search);
-		return new ModelAndView("Tier2PendingAccounts" , "searchForm", searchForm);
-	
-		}
-		else
+		SearchForm searchForm=accountServicesImpl.getAllPendingAccounts();
+
+		if(searchForm==null)
 			return new ModelAndView("Login");
-  
+		else
+		return new ModelAndView("Tier2PendingAccounts" , "searchForm", searchForm);
         
     }
 	
@@ -87,150 +53,26 @@ public class Tier2PendingAccountsContoller{
 	@RequestMapping(value = "/Tier2AuthAcc", method = RequestMethod.POST)
     public ModelAndView authorizeAccount(@RequestParam(required = true, name="accountnumber") String accNumber,Model model) throws ParseException {
 		
-		System.out.println("++++++++"+accNumber);
-		Authentication x = SecurityContextHolder.getContext().getAuthentication();
-//		if (x == null || !x.isAuthenticated()) {
-//			System.out.println("NOT AUTHENTICATED");
-//			return new ModelAndView("Login");
-//		}
-		Boolean isTier2=false;
-		for (GrantedAuthority grantedAuthority : x.getAuthorities()) {
-			  System.out.println(grantedAuthority.getAuthority());
-			    if (grantedAuthority.getAuthority().equals("tier2")) {
-			    	System.out.println("Tier 2 Success");
-			        isTier2 = true;
-			        break;
-			    }
-			}
-		if(isTier2)
-		{
-		Session s = SessionManager.getSession("");
-		List<Account> account=null;
-		System.out.println("Came here");
-		account=s.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class)
-				.setParameter("accountNumber", accNumber).getResultList();
-		//ArrayList<Search> search=new ArrayList<>()
-		Transaction tx = null;
-		tx = s.beginTransaction();
-		for(Account temp : account )
-		{
-//			Boolean status=false;
-//			if(temp.getStatus()==1)
-//				status=true;
-//			Search tempSearch=new Search(temp.getAccountNumber(),temp.getCurrentBalance()+"",status);
-//			
-//			if(temp.getUser().getRole().equals("customer"))
-//			search.add(tempSearch);	
-//			System.out.println(temp.getUser().getRole());
-			
-			if(temp.getStatus()==0 && temp.getUser().getRole().equals("customer"))
-			{
-				temp.setStatus(1);
-				
-				DateFormat dateFormat = new SimpleDateFormat("mm-dd-yyyy");
-				Date date = new Date();
-				Date d = new SimpleDateFormat("mm-dd-yyyy").parse(dateFormat.format(date));
-				temp.setApprovalDate(d);
-				s.saveOrUpdate(temp);
-			}
-			else
-			{
-				if (tx.isActive())
-				    tx.commit();
-				s.close();
-				return new ModelAndView("redirect:/Tier2PendingAccountView");
-			}
-			
-	
-		}
-
+		AccountServicesImpl accountServicesImpl = new AccountServicesImpl();
 		
-		if (tx.isActive())
-		    tx.commit();
-		s.close();
-		
-		
-		
-		
-		
-		return new ModelAndView("redirect:/Tier2PendingAccountView");
-	
-		}
-		else
+		Boolean flag=accountServicesImpl.authorizeAccounts(accNumber);
+		if(flag==null)
 			return new ModelAndView("Login");
-  
+		else
+			return new ModelAndView("redirect:/Tier2PendingAccountView");  
         
     }
+	
 	@RequestMapping(value = "/Tier2DecAcc", method = RequestMethod.POST)
     public ModelAndView declineAccount(@RequestParam(required = true, name="accountnumber") String accNumber,Model model) throws ParseException {
 		
-		System.out.println("$$$$$$$$$$$$"+accNumber);
-		Authentication x = SecurityContextHolder.getContext().getAuthentication();
-//		if (x == null || !x.isAuthenticated()) {
-//			System.out.println("NOT AUTHENTICATED");
-//			return new ModelAndView("Login");
-//		}
-		Boolean isTier2=false;
-		for (GrantedAuthority grantedAuthority : x.getAuthorities()) {
-			  System.out.println(grantedAuthority.getAuthority());
-			    if (grantedAuthority.getAuthority().equals("tier2")) {
-			    	System.out.println("Tier 2 Success");
-			        isTier2 = true;
-			        break;
-			    }
-			}
-		if(isTier2)
-		{
-		Session s = SessionManager.getSession("");
-		List<Account> account=null;
-		System.out.println("Came here");
-		account=s.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class)
-				.setParameter("accountNumber", accNumber).getResultList();
-		//ArrayList<Search> search=new ArrayList<>()
-		Transaction tx = null;
-		tx = s.beginTransaction();
-		for(Account temp : account )
-		{
-//			Boolean status=false;
-//			if(temp.getStatus()==1)
-//				status=true;
-//			Search tempSearch=new Search(temp.getAccountNumber(),temp.getCurrentBalance()+"",status);
-//			
-//			if(temp.getUser().getRole().equals("customer"))
-//			search.add(tempSearch);	
-//			System.out.println(temp.getUser().getRole());
-			if(temp.getStatus()==0 && temp.getUser().getRole().equals("customer"))
-			{
-				temp.setStatus(2);
-				
-				DateFormat dateFormat = new SimpleDateFormat("mm-dd-yyyy");
-				Date date = new Date();
-				Date d = new SimpleDateFormat("mm-dd-yyyy").parse(dateFormat.format(date));
-				temp.setApprovalDate(d);
-				s.saveOrUpdate(temp);
-			}
-			else
-			{
-				if (tx.isActive())
-				    tx.commit();
-				s.close();
-				return new ModelAndView("redirect:/Tier2PendingAccountView");
-			}
-				
-			
-			
-		}
-
+	AccountServicesImpl accountServicesImpl = new AccountServicesImpl();
 		
-		if (tx.isActive())
-		    tx.commit();
-		s.close();
-				
-		return new ModelAndView("redirect:/Tier2PendingAccountView");
-	
-		}
-		else
+		Boolean flag=accountServicesImpl.declineAccounts(accNumber);
+		if(flag==null)
 			return new ModelAndView("Login");
+		else
+			return new ModelAndView("redirect:/Tier2PendingAccountView");  
   
         
     }

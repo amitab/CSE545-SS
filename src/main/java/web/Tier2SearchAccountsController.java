@@ -31,59 +31,14 @@ public class Tier2SearchAccountsController{
 	
 	@RequestMapping(value = "/Tier2Search", method = RequestMethod.POST)
     public ModelAndView tier2Page(@RequestParam(required = true, name="accountnumber") String accNumber, Model model) {
+
+		AccountServicesImpl accountServicesImpl = new AccountServicesImpl();
 		
-		System.out.println("ACC NUMEBER  "+accNumber);
-		
-		Authentication x = SecurityContextHolder.getContext().getAuthentication();
-//		if (x == null || !x.isAuthenticated()) {
-//			System.out.println("NOT AUTHENTICATED");
-//			return new ModelAndView("Login");
-//		}
-		Boolean isTier2=false;
-		for (GrantedAuthority grantedAuthority : x.getAuthorities()) {
-			  System.out.println(grantedAuthority.getAuthority());
-			    if (grantedAuthority.getAuthority().equals("tier2")) {
-			    	System.out.println("Tier 2 Success");
-			        isTier2 = true;
-			        break;
-			    }
-			}
-		if(isTier2)
-		{
-		Session s = SessionManager.getSession("");
-		List<Account> account=null;
-		System.out.println("Came here");
-		account=s.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class)
-				.setParameter("accountNumber", accNumber).getResultList();
-		
-		
-		SearchForm searchForm = new SearchForm();
-		//ArrayList<Search> search=new ArrayList<>();
-		List<Search> search = new ArrayList<Search>();
-		for(Account temp : account )
-		{
-			Boolean status=false;
-			if(temp.getStatus()==1)
-				status=true;
-			Search tempSearch=new Search(temp.getAccountNumber(),temp.getCurrentBalance()+"",status);
-			
-			if(temp.getUser().getRole().equals("customer"))
-			search.add(tempSearch);	
-			System.out.println(temp.getUser().getRole());
-			
-		}
-		System.out.println("Searchs");
-		System.out.println(search);
-		searchForm.setSearchs(search);
-		
-		
-		
-		
-		return new ModelAndView("Tier2SearchAccount" , "searchForm", searchForm);
-	
-		}
-		else
+		SearchForm searchForm=accountServicesImpl.getAccounts(accNumber);
+		if(searchForm==null)
 			return new ModelAndView("Login");
+		else
+		return new ModelAndView("Tier2SearchAccount" , "searchForm", searchForm);
   
         
     }

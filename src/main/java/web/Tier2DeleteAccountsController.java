@@ -21,75 +21,27 @@ import org.springframework.web.servlet.ModelAndView;
 import database.SessionManager;
 import model.Account;
 
+
 @Controller
 public class Tier2DeleteAccountsController {
+	
 	@RequestMapping(value = "/Tier2DelAcc", method = RequestMethod.POST)
     public ModelAndView deleteAccount(@RequestParam(required = true, name="accountnumber") String accNumber,Model model) throws ParseException {
-		
-		System.out.println("++++++++"+accNumber);
-		Authentication x = SecurityContextHolder.getContext().getAuthentication();
-//		if (x == null || !x.isAuthenticated()) {
-//			System.out.println("NOT AUTHENTICATED");
-//			return new ModelAndView("Login");
-//		}
-		Boolean isTier2=false;
-		for (GrantedAuthority grantedAuthority : x.getAuthorities()) {
-			  System.out.println(grantedAuthority.getAuthority());
-			    if (grantedAuthority.getAuthority().equals("tier2")) {
-			    	System.out.println("Tier 2 Success");
-			        isTier2 = true;
-			        break;
-			    }
-			}
-		if(isTier2)
-		{
-		Session s = SessionManager.getSession("");
-		List<Account> account=null;
-		System.out.println("Came here");
-		account=s.createQuery("FROM Account WHERE account_number = :accountNumber AND status=1", Account.class)
-				.setParameter("accountNumber", accNumber).getResultList();
-		//ArrayList<Search> search=new ArrayList<>()
-		System.out.println(account.size()+"SIZEEEEE");
-		if(account.size()==0)
-		{
-			return new ModelAndView("Tier2DeleteAccount","message","An active account not found");
-		}
-		Transaction tx = null;
-		tx = s.beginTransaction();
-		for(Account temp : account )
-		{
-//			Boolean status=false;
-//			if(temp.getStatus()==1)
-//				status=true;
-//			Search tempSearch=new Search(temp.getAccountNumber(),temp.getCurrentBalance()+"",status);
-//			
-//			if(temp.getUser().getRole().equals("customer"))
-//			search.add(tempSearch);	
-//			System.out.println(temp.getUser().getRole());
-			
-			if(temp.getUser().getRole().equals("customer"))
-			{
-				temp.setStatus(3);
-				s.saveOrUpdate(temp);
-			}
-			
 	
-		}
-
+		AccountServicesImpl accountServicesImpl = new AccountServicesImpl();
 		
-		if (tx.isActive())
-		    tx.commit();
-		s.close();
+		Boolean flag=accountServicesImpl.deleteAccounts(accNumber);
 		
-		
-		
-		
-		return new ModelAndView("Tier2DeleteAccount","message","The account was successfully deleted");
-	
-		}
-		else
+		if(flag==null)
+		{
 			return new ModelAndView("Login");
-  
-        
+		}
+		else 
+		{
+			if(flag)
+				return new ModelAndView("Tier2DeleteAccount","message","The account was successfully deleted");
+			else
+				return new ModelAndView("Tier2DeleteAccount","message","An active account was not found");
+		}        
     } 
 }
