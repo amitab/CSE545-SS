@@ -137,10 +137,21 @@ public class EmployeeUpdate {
 		
 		//Date date = new SimpleDateFormat("mm-dd-yyyy").parse(dateOfBirth);
 		
-		Session s = SessionManager.getSession("");
-		User u = null;
-		u=s.createQuery("FROM User WHERE username = :username", User.class)
+		 Session s = SessionManager.getSession("");
+		 
+		 User u = null;
+		
+			u=s.createQuery("FROM User WHERE username = :username", User.class)
 					.setParameter("username", username).getSingleResult();
+			
+			System.out.println("USER: " + u.getUsername());
+			
+			
+	
+		
+			Integer uid = u.getId();
+		
+		System.out.println(uid);
 		Transaction tx = null;
 		tx = s.beginTransaction();
 		UserDetail ud = new UserDetail();
