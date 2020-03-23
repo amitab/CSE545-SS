@@ -1,11 +1,18 @@
 package web;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,12 +24,14 @@ import org.springframework.web.servlet.ModelAndView;
 import database.SessionManager;
 import forms.EmployeeSearchForm;
 import forms.SearchForm;
+import model.Account;
 import model.User;
 import model.UserDetail;
 
 
 @Controller
 public class AdminController {
+
 	
 	@RequestMapping("/Admin/Dashboard")
     public String hello(final HttpServletRequest request, Model model) {
@@ -44,7 +53,7 @@ public class AdminController {
 	
 	@RequestMapping("/Admin/CreateEmployee")
     public String employeeInsert(final HttpServletRequest request, Model model) {
-		return "AdminEmployeeInsert";
+		return "AdminRegistrationExternal";
     }
 	
 	@RequestMapping("/Admin/UpdateEmployee")
@@ -141,6 +150,36 @@ public class AdminController {
 			else
 				return new ModelAndView("AdminEmployeeDelete" , "message", "An Employee account was not found");
     }
+	@RequestMapping(value = "/Admin/ExternalRegister", method = RequestMethod.POST)
+    public ModelAndView register(
+    		@RequestParam(required = true, name="designation") String userType,
+    		@RequestParam(required = true, name="firstname") String firstname,
+    		@RequestParam(required = true, name="middlename") String middlename,
+    		@RequestParam(required = true, name="lastname") String lastname,
+    		@RequestParam(required = true, name="username") String username,
+    		@RequestParam(required = true, name="password") String password,
+    		@RequestParam(required = true, name="email") String email,
+    		@RequestParam(required = true, name="address") String address,
+    		@RequestParam(required = true, name="phone") String phone,
+    		@RequestParam(required = true, name="date_of_birth") String dateOfBirth,
+    		@RequestParam(required = true, name="ssn") String ssn,
+    		@RequestParam(required = true, name="secquestion1") String secquestion1,
+    		@RequestParam(required = true, name="secquestion2") String secquestion2) throws ParseException {
+
+		
+		EmployeeServiceImpl employeeServiceImpl = new EmployeeServiceImpl();
+		Boolean flag=employeeServiceImpl.createEmployee(userType,firstname,middlename,lastname,username,password,email,address,phone,dateOfBirth,ssn,secquestion1,secquestion2);
+		if(flag==null)
+			return new ModelAndView("Login");
+		else
+			if(flag)
+				return new ModelAndView("AdminRegisterExternal","message","Account was successfully created");
+			else
+				return new ModelAndView("AdminRegisterExternal","message","An Active Username was already found");	
+    }
+
+
+
 	
 
 

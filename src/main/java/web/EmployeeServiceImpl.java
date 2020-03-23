@@ -1,13 +1,20 @@
 package web;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import database.SessionManager;
 import forms.Search;
@@ -19,6 +26,8 @@ import forms.EmployeeSearch;
 import forms.EmployeeSearchForm;
 
 public class EmployeeServiceImpl {
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	public EmployeeSearchForm getEmployees(String username) {	
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -160,5 +169,84 @@ public class EmployeeServiceImpl {
    
 		
 	}
+	
+	public Boolean createEmployee(String userType,String firstname,String middlename,String lastname,String username,String password,String email,String address,String phone,String dateOfBirth,String ssn,String secquestion1,String secquestion2) throws ParseException
+	{
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String currentSessionUser = null;
+		if(auth!=null || auth.isAuthenticated()) {
+			for (GrantedAuthority grantedAuthority : auth.getAuthorities()) {
+				if (grantedAuthority.getAuthority().equals("admin")) {
+					currentSessionUser = grantedAuthority.getAuthority();
+				}
+			}
+			if(currentSessionUser==null) {
+				return null;
+			}
+		}
+		
+		System.out.println(userType);
+		System.out.println(firstname);
+		System.out.println(middlename);
+		System.out.println(lastname);
+		System.out.println(username);
 
-}
+		System.out.println(email);
+		System.out.println(address);
+		System.out.println(phone);
+		System.out.println(dateOfBirth);
+		System.out.println(ssn);
+		System.out.println(secquestion1);
+		System.out.println(secquestion2);
+		
+		Session s = SessionManager.getSession("");
+		Transaction tx = null;
+		List<User> users=null;
+		users=s.createQuery("FROM User WHERE username = :username AND status=1", User.class)
+				.setParameter("username", username).getResultList();
+		if(users.size()==0)
+		{			
+			tx = s.beginTransaction();
+			System.out.println(password+"@@@@@@@@@@");
+			System.out.println(passwordEncoder);
+			User user = new User();
+			user.setUsername(username);
+			user.setPassword(passwordEncoder.encode(password));
+			user.setRole(userType);
+			user.setStatus(1);
+			s.saveOrUpdate(user);
+			UserDetail userDetail;
+			Date date = new SimpleDateFormat("mm-dd-yyyy").parse(dateOfBirth);
+			Integer uid = user.getId();
+			System.out.println("UID AFTER SAVE: " + uid);
+			userDetail = new UserDetail();
+			userDetail.setUser(user);
+			userDetail.setFirstName(firstname);
+			userDetail.setMiddleName(middlename);
+			userDetail.setLastName(lastname);
+			userDetail.setEmail(email);
+			userDetail.setPhone(phone);
+			userDetail.setAddress1(address);
+			userDetail.setAddress2("");
+			userDetail.setCity("");
+			userDetail.setDateOfBirth(date);
+			userDetail.setProvince("");
+			userDetail.setSsn(ssn);
+			userDetail.setZip(100L);
+			userDetail.setQuestion1(secquestion1);
+			userDetail.setQuestion2(secquestion2);
+			s.saveOrUpdate(userDetail);
+			if (tx.isActive())
+			    tx.commit();
+			s.close();
+			return true;
+		
+		}
+		else
+			return false;
+
+
+
+		}
+	}
