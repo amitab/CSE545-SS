@@ -201,15 +201,4 @@ public class Tier1DashboardController {
 		return "Tier1ViewAccounts";
 		
 	}
-	
-	@RequestMapping(value = "/Logout")
-	public ModelAndView logout(HttpServletRequest request) {
-		HttpSession session = request.getSession(false);
-		if (session != null) {
-		    session.invalidate();
-		    session.setMaxInactiveInterval(1); 
-		}
-		return new ModelAndView("/Logout");
-		
-	}
 }
