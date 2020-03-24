@@ -112,11 +112,15 @@ public class TransactionServicesImpl {
 
 			Transaction transaction = session.get(Transaction.class, transactionId);
 			transaction.setApprovalStatus(false);
-			transaction.setDecisionDate(new Date());
-			
-			session.save(transaction);
-			if (txn.isActive()) txn.commit();
 
+			if (currentSessionUser.equals(Constants.TIER1))
+				transaction.setLevel1Approval(false);
+			if (currentSessionUser.equals(Constants.TIER2))
+				transaction.setLevel2Approval(false);
+
+			transaction.setDecisionDate(new Date());
+
+			session.save(transaction);
 			if (txn.isActive()) txn.commit();
 			
 		} catch (Exception e) {
@@ -399,97 +403,19 @@ public class TransactionServicesImpl {
 
 		if (currentSessionUser == null)
 		  return false;
-		
+
 		Session session = SessionManager.getSession(currentSessionUser);
-		Transaction transaction = null;
 		try {
-			transaction = session.createQuery("FROM Transaction WHERE id = : id and transaction_type = : transaction_type", Transaction.class).setParameter("id", transactionId).setParameter("transaction_type", transactionType).getSingleResult();
-		}catch (NoResultException e){
+			session
+				.createQuery("FROM Transaction WHERE id = : id and transaction_type = : transaction_type", Transaction.class)
+				.setParameter("id", transactionId)
+				.setParameter("transaction_type", transactionType)
+				.getSingleResult();
+		} catch (NoResultException e) {
 			return false;
 		}
-		if(transaction==null)
-			return false;
-		return true;
-	}
-	
-	
-	public boolean addMoneyToAccount(String accountNumber, BigDecimal amount) {
-		String currentSessionUser = WebSecurityConfig
-		  .getCurrentSessionAuthority()
-		  .filter(a -> a.equals(Constants.TIER1) || a.equals(Constants.TIER2))
-		  .findFirst().orElse(null);
 
-		if (currentSessionUser == null)
-		  return false;
-		
-		Session session = SessionManager.getSession(currentSessionUser);
-		
-		org.hibernate.Transaction txn = null;
-		txn = session.beginTransaction();
-		
-		Account account = null;
-		try{
-			account = session.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class).setParameter("accountNumber", accountNumber).getSingleResult();
-		}catch(NoResultException e) {
-			return false;
-		}
-		
-		if(account==null)
-			return false;
-		
-		
-		BigDecimal cuurentBalance = account.getCurrentBalance();
-		account.setCurrentBalance(cuurentBalance.add(amount));
-		
-		session.save(account);
-		if (txn.isActive())
-		    txn.commit();
-		session.close();
-		
 		return true;
-		
-	}
-	
-	public boolean removeMoneyFromAccount(String accountNumber, BigDecimal amount) {
-		String currentSessionUser = WebSecurityConfig
-		  .getCurrentSessionAuthority()
-		  .filter(a -> a.equals(Constants.TIER1) || a.equals(Constants.TIER2))
-		  .findFirst().orElse(null);
-
-		if (currentSessionUser == null)
-		  return false;
-		
-		Session session = SessionManager.getSession(currentSessionUser);
-		
-		Account account = null;
-		try{
-			account = session.createQuery("FROM Account WHERE account_number = :accountNumber", Account.class).setParameter("accountNumber", accountNumber).getSingleResult();
-		}catch(NoResultException e) {
-			return false;
-		}
-		
-		if(account==null)
-			return false;
-		
-		org.hibernate.Transaction txn = null;
-		txn = session.beginTransaction();
-		
-		BigDecimal cuurentBalance = account.getCurrentBalance();
-
-		if(cuurentBalance.intValue() < amount.intValue()) {
-			if (txn.isActive())
-			    txn.rollback();
-			session.close();
-			return false;
-		
-		}
-		account.setCurrentBalance(cuurentBalance.subtract(amount));
-		session.save(account);
-		if (txn.isActive())
-		    txn.commit();
-		session.close();
-		return true;
-		
 	}
 	
 }
