@@ -58,7 +58,6 @@ public class EmployeeServiceImpl {
 		{
 			if((temp.getRole().equals("tier2")||temp.getRole().equals("tier1")) && temp.getStatus()!=3)
 			{
-			System.out.println("Get Here");
 			UserDetail ud = new UserDetail();
 			ud = s.createQuery("FROM UserDetail WHERE user_id = :uid", UserDetail.class)
 					.setParameter("uid",temp.getId()).getSingleResult();
@@ -89,7 +88,6 @@ public class EmployeeServiceImpl {
 		{
 			if((temp.getRole().equals("tier2")||temp.getRole().equals("tier1")) && temp.getStatus()!=3)
 			{
-			System.out.println("Get Here");
 			UserDetail ud = new UserDetail();
 			ud = s.createQuery("FROM UserDetail WHERE user_id = :uid", UserDetail.class)
 			.setParameter("uid", temp.getId()).getSingleResult();
@@ -156,20 +154,6 @@ public class EmployeeServiceImpl {
 	{
 		if (!isAdminSession())
 			return null;
-		
-		System.out.println(userType);
-		System.out.println(firstname);
-		System.out.println(middlename);
-		System.out.println(lastname);
-		System.out.println(username);
-
-		System.out.println(email);
-		System.out.println(address);
-		System.out.println(phone);
-		System.out.println(dateOfBirth);
-		System.out.println(ssn);
-		System.out.println(secquestion1);
-		System.out.println(secquestion2);
 		
 		Session s = SessionManager.getSession("");
 		Transaction tx = null;
