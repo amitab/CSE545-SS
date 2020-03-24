@@ -274,13 +274,16 @@ public class TransactionServicesImpl {
 			txn = session.beginTransaction();
 			
 			Transaction transaction = session.get(Transaction.class, chequeId);
-			transaction.setToAccount(accountNumber);
-
-			Account to = getAccountByNumber(accountNumber, session);
 			
-			if (applyTransaction(null, to, transaction, currentSessionUser))
+			if (transaction.getAmount().compareTo(amount) != 0)
+				throw new Exception("Invalid Cheque Deposit request!");
+			
+			Transaction depositTransaction = createTransaction(null, accountNumber, transaction.getAmount(), Constants.CHEQUE);
+			Account to = getAccountByNumber(accountNumber, session);
+
+			if (applyTransaction(null, to, depositTransaction, currentSessionUser))
 				session.update(to);
-			session.update(transaction);
+			session.save(depositTransaction);
 			
 			if (txn.isActive()) txn.commit();
 			
@@ -341,11 +344,8 @@ public class TransactionServicesImpl {
 				to.setCurrentBalance(to.getCurrentBalance().add(transaction.getAmount()));
 			}
 
-			// Dont set approved if its an issueCheque action
-			if (!(transaction.getTransactionType() != Constants.CHEQUE && to == null)) {
-				transaction.setDecisionDate(new Date());
-				transaction.setApprovalStatus(true);
-			}
+			transaction.setDecisionDate(new Date());
+			transaction.setApprovalStatus(true);
 			
 			return true;
 		}
