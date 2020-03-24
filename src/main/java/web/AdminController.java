@@ -1,19 +1,11 @@
 package web;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,16 +13,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import database.SessionManager;
 import forms.EmployeeSearchForm;
-import forms.SearchForm;
-import model.Account;
-import model.User;
-import model.UserDetail;
 
 
 @Controller
 public class AdminController {
+	@Resource(name = "employeeServiceImpl")
+	EmployeeServiceImpl employeeServiceImpl;
 
 	
 	@RequestMapping("/Admin/Dashboard")
@@ -73,8 +62,6 @@ public class AdminController {
 	
 	@RequestMapping(value = "/Admin/Search", method = RequestMethod.POST)
     public ModelAndView adminSearchPage(@RequestParam(required = true, name="username") String username, Model model) {
-		EmployeeServiceImpl employeeServiceImpl = new EmployeeServiceImpl();
-		
 		EmployeeSearchForm employeeSearchForm=employeeServiceImpl.getEmployees(username);
 		if(employeeSearchForm==null)
 			return new ModelAndView("Login");
@@ -87,8 +74,6 @@ public class AdminController {
 	
 	@RequestMapping(value = "/Admin/UpdateSearch", method = RequestMethod.POST)
     public String adminUpdateSearchPage(@RequestParam(required = true, name="username") String username, Model model) {
-		EmployeeServiceImpl employeeServiceImpl = new EmployeeServiceImpl();
-		
 		EmployeeSearchForm employeeSearchForm=employeeServiceImpl.getEmployees(username);
 		if(employeeSearchForm==null)
 			return "Login";
@@ -120,8 +105,7 @@ public class AdminController {
     		@RequestParam(required = true, name="middleName") String middleName,
     		@RequestParam(required = true, name="phoneNumber") String phoneNumber,
     		final HttpServletRequest request, Model model)  {
-			
-		EmployeeServiceImpl employeeServiceImpl = new EmployeeServiceImpl();
+
 		Boolean flag=employeeServiceImpl.updateEmployees(userName, email, firstName, lastName, middleName, phoneNumber);
 		
 		if(flag==null)
@@ -139,8 +123,7 @@ public class AdminController {
     		@RequestParam(required = true, name="lastName") String lastName,
     		@RequestParam(required = true, name="userName") String userName,
     		final HttpServletRequest request, Model model)  {
-			
-		EmployeeServiceImpl employeeServiceImpl = new EmployeeServiceImpl();
+
 		Boolean flag=employeeServiceImpl.deleteEmployees(userName,firstName, lastName);
 		if(flag==null)
 			return new ModelAndView("Login");
@@ -166,8 +149,6 @@ public class AdminController {
     		@RequestParam(required = true, name="secquestion1") String secquestion1,
     		@RequestParam(required = true, name="secquestion2") String secquestion2) throws ParseException {
 
-		
-		EmployeeServiceImpl employeeServiceImpl = new EmployeeServiceImpl();
 		Boolean flag=employeeServiceImpl.createEmployee(userType,firstname,middlename,lastname,username,password,email,address,phone,dateOfBirth,ssn,secquestion1,secquestion2);
 		if(flag==null)
 			return new ModelAndView("Login");

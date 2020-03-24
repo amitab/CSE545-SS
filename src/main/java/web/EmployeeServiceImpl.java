@@ -1,6 +1,5 @@
 package web;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,35 +13,39 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.stereotype.Component;
 
 import database.SessionManager;
-import forms.Search;
-import forms.SearchForm;
-import model.Account;
 import model.User;
 import model.UserDetail;
 import forms.EmployeeSearch;
 import forms.EmployeeSearchForm;
 
+@Component(value = "employeeServiceImpl")
 public class EmployeeServiceImpl {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
-	public EmployeeSearchForm getEmployees(String username) {	
+	private boolean isAdminSession() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String currentSessionUser = null;
-		if(auth!=null || auth.isAuthenticated()) {
+		if(auth!=null && auth.isAuthenticated()) {
 			for (GrantedAuthority grantedAuthority : auth.getAuthorities()) {
 				if (grantedAuthority.getAuthority().equals("admin")) {
 					currentSessionUser = grantedAuthority.getAuthority();
 				}
 			}
 			if(currentSessionUser==null) {
-				return null;
+				return false;
 			}
 		}
 		
+		return true;
+	}
+	
+	public EmployeeSearchForm getEmployees(String username) {
+		if (!isAdminSession())
+			return null;
 		
 		Session s = SessionManager.getSession("");
 		List<User> user=null;
@@ -70,19 +73,8 @@ public class EmployeeServiceImpl {
 	}
 	
 	public Boolean updateEmployees(String userName,String email,String firstName,String lastName,String middleName,String phoneNumber) {	
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String currentSessionUser = null;
-		if(auth!=null || auth.isAuthenticated()) {
-			for (GrantedAuthority grantedAuthority : auth.getAuthorities()) {
-				if (grantedAuthority.getAuthority().equals("admin")) {
-					currentSessionUser = grantedAuthority.getAuthority();
-				}
-			}
-			if(currentSessionUser==null) {
-				return null;
-			}
-		}
-		
+		if (!isAdminSession())
+			return null;
 		
 		 Session s = SessionManager.getSession("");
 		 List<User> user=null;
@@ -119,19 +111,9 @@ public class EmployeeServiceImpl {
 		
 	}
 	
-	public Boolean deleteEmployees(String userName,String firstName,String lastName) {	
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String currentSessionUser = null;
-		if(auth!=null || auth.isAuthenticated()) {
-			for (GrantedAuthority grantedAuthority : auth.getAuthorities()) {
-				if (grantedAuthority.getAuthority().equals("admin")) {
-					currentSessionUser = grantedAuthority.getAuthority();
-				}
-			}
-			if(currentSessionUser==null) {
-				return null;
-			}
-		}
+	public Boolean deleteEmployees(String userName,String firstName,String lastName) {
+		if (!isAdminSession())
+			return null;
 		
 		
 		 Session s = SessionManager.getSession("");
@@ -172,19 +154,8 @@ public class EmployeeServiceImpl {
 	
 	public Boolean createEmployee(String userType,String firstname,String middlename,String lastname,String username,String password,String email,String address,String phone,String dateOfBirth,String ssn,String secquestion1,String secquestion2) throws ParseException
 	{
-		
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		String currentSessionUser = null;
-		if(auth!=null || auth.isAuthenticated()) {
-			for (GrantedAuthority grantedAuthority : auth.getAuthorities()) {
-				if (grantedAuthority.getAuthority().equals("admin")) {
-					currentSessionUser = grantedAuthority.getAuthority();
-				}
-			}
-			if(currentSessionUser==null) {
-				return null;
-			}
-		}
+		if (!isAdminSession())
+			return null;
 		
 		System.out.println(userType);
 		System.out.println(firstname);
@@ -203,7 +174,7 @@ public class EmployeeServiceImpl {
 		Session s = SessionManager.getSession("");
 		Transaction tx = null;
 		List<User> users=null;
-		users=s.createQuery("FROM User WHERE username = :username AND status=1", User.class)
+		users=s.createQuery("FROM User WHERE username = :username", User.class)
 				.setParameter("username", username).getResultList();
 		if(users.size()==0)
 		{			
