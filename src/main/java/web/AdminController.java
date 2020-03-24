@@ -154,9 +154,9 @@ public class AdminController {
 			return new ModelAndView("Login");
 		else
 			if(flag)
-				return new ModelAndView("AdminRegisterExternal","message","Account was successfully created");
+				return new ModelAndView("AdminRegistrationExternal","message","Account was successfully created");
 			else
-				return new ModelAndView("AdminRegisterExternal","message","An Active Username was already found");	
+				return new ModelAndView("AdminRegistrationExternal","message","An Active Username was already found");	
     }
 
 
