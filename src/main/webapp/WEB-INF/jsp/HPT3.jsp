@@ -16,7 +16,6 @@
 		       					<li><a href="/Admin/UpdateEmployee">Modify Employee</a></li>
 		       					<li><a href="/Admin/DeleteEmployee">Delete Employee</a></li>
 		       					<li><a href="/Admin/SystemLogs">System Logs</a></li>
-			              <li class="cta"><a class="ButtonDesign" href="/logout">Log Out</a></li>
 		                <form method="post" action="/perform_logout" id="form-logout">
                       <button type="submit">Logout</button>
                       <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>         

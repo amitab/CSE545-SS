@@ -21,7 +21,6 @@
 		                <li class="cta"><a class="ButtonDesign" href="/Tier1WithdrawMoney">Withdraw Money</a></li>
 		                <li class="cta"><a class="ButtonDesign" href="/Tier1ViewAccounts">View Customer Accounts</li>
 		                <li class="ctd"><a class="ButtonDesign" href="/Tier1UpdatePassword">Change Password</a></li>
-		                <li class="cta"><a class="ButtonDesign" href="/Logout" onclick="noBack">Log Out</a></li>
 
 		                <form method="post" action="/perform_logout" id="form-logout">
                       <button type="submit">Logout</button>
