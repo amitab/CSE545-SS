@@ -34,6 +34,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import communication.Mailer;
 import communication.Messager;
 import database.SessionManager;
+import model.Otp;
 import model.User;
 import model.UserDetail;
 import security.OtpUtils;
@@ -102,14 +103,7 @@ public class LoginController {
 		    		.getSingleResult();
 		    
 		    if (u != null) {
-		    	Boolean emailPending = s
-		    		.createQuery("SELECT COUNT(*) > 0 "
-		    				+ "FROM Otp "
-		    				+ "WHERE initator = :user_id AND "
-		    				+ "completed = FALSE AND "
-		    				+ "expiry_date > NOW() AND "
-		    				+ "TIMESTAMPDIFF(MINUTE, creation_date, NOW()) < :offset",
-		    			Boolean.class)
+		    	Boolean emailPending = s.createNamedQuery("FindPendingTransactionsByUser", Boolean.class)
 		    		.setParameter("user_id", u.getId())
 		    		.setParameter("offset", OtpUtils.EXPIRE_TIME)
 		    		.uniqueResult();
@@ -121,22 +115,39 @@ public class LoginController {
 		    	}
 		    	
 		    	UserDetail details = u.getUserDetail();
-
-		    	String token = otpUtils.generateOtp(u, request.getRemoteHost(), mode);
 		    	// Don't wait, ask them to request again later
 		    	Application.executorService.submit(() -> {
+		    		Session sess = SessionManager.getSession("");
+		    		Transaction tx = null;
+		    		Otp otp = null;
 		    		
-		    		if (mode == 1) {
-			    		System.out.println("Sending Email...");
-				    	mailer.sendEmail(details.getEmail(),
-				    			"BigPPBank: Your link to reset your password.",
-				    			appUrl + "/reset_password?token=" + token);
-		    		} else if (mode == 0) {
-			    		System.out.println("Sending Message..." + token);
-			    		messager.sendSms(details.getPhone(), token);
-		    		}
-					System.out.println("Sent!");
+		    		try {
+		    			tx = sess.beginTransaction();
 
+			    		otp = otpUtils.generateOtp(u, request.getRemoteHost(), mode);
+			    		sess.save(otp);
+			    		
+			    		if (mode == 1) {
+				    		System.out.println("Sending Email...");
+					    	mailer.sendEmail(details.getEmail(),
+					    			"BigPPBank: Your link to reset your password.",
+					    			appUrl + "/reset_password?token=" + otp.getOtpKey());
+			    		} else if (mode == 0) {
+				    		System.out.println("Sending Message...");
+				    		messager.sendSms(details.getPhone(), otp.getOtpKey());
+			    		}
+						System.out.println("Sent!");
+		    			
+		    			if (tx.isActive())
+		    			    tx.commit();
+		    			
+		    		} catch (Exception e) {
+		    			e.printStackTrace();
+		    			if (tx != null) tx.rollback();
+		    		} finally {
+		    			sess.close();
+		    		}
+		    		
 		    	});
 
 		    }

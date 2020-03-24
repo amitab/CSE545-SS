@@ -22,7 +22,7 @@ public class OtpUtils {
 	
 	public static final Integer EXPIRE_TIME = 5;
 
-	public String generateOtp(User user, String ipAddress, Integer mode) throws Exception {
+	public Otp generateOtp(User user, String ipAddress, Integer mode) throws Exception {
 		Otp otp = new Otp();
 		Date creationDate = new Date();
 		Calendar c = Calendar.getInstance();
@@ -41,35 +41,15 @@ public class OtpUtils {
 			throw new Exception("Invalid communication mode for OTP.");
 		}
 		
-		Session s = SessionManager.getSession("");
-		
-		Transaction tx = null;
-		try {
-			tx = s.beginTransaction();
+		otp.setMode(mode);
+		otp.setOtpKey(token);
+		otp.setCompleted(false);
+		otp.setCreationDate(creationDate);
+		otp.setExpiryDate(expiryDate);
+		otp.setInitator(user.getId());
+		otp.setIpAddress(ipAddress);
 
-			otp.setMode(mode);
-			otp.setOtpKey(token);
-			otp.setCompleted(false);
-			otp.setCreationDate(creationDate);
-			otp.setExpiryDate(expiryDate);
-			otp.setInitator(user.getId());
-			otp.setIpAddress(ipAddress);
-		    System.out.println("Saving: " + ipAddress);
-			
-			s.save(otp);
-			
-			if (tx.isActive())
-			    tx.commit();
-		
-		} catch (Exception e) {
-			if (tx != null) tx.rollback();
-			e.printStackTrace();
-			throw e;
-		} finally {
-			s.close();
-		}
-		
-		return token;
+		return otp;
 	}
 	
 	public User validateOtp(String token, String ipAddress) {

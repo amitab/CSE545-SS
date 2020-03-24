@@ -12,6 +12,16 @@ import java.util.Date;
 @Entity
 @Table(name="otp")
 @NamedQuery(name="Otp.findAll", query="SELECT o FROM Otp o")
+@org.hibernate.annotations.NamedQueries({
+    @org.hibernate.annotations.NamedQuery(name = "FindPendingTransactionsByUser", 
+      query = "SELECT COUNT(*) > 0 "
+      		+ "FROM Otp "
+      		+ "WHERE "
+      			+ "initator = :user_id AND "
+      			+ "completed = FALSE AND "
+      			+ "expiry_date > NOW() AND "
+      			+ "TIMESTAMPDIFF(MINUTE, creation_date, NOW()) < :offset"),
+})
 public class Otp implements Serializable {
 	private static final long serialVersionUID = 1L;
 
