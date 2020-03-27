@@ -32,3 +32,4 @@ build/
 
 src/main/java/hibernate.cfg.xml
 .DS_Store
+*.log
