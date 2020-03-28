@@ -18,5 +18,9 @@ if (document.layers){
     document.oncontextmenu=ieClicked;
 }
 document.oncontextmenu=new Function("return false")
+document.oncopy=new Function("return false")
+document.oncut=new Function("return false")
+document.onpaste=new Function("return false")
+document.onselectstart=new Function("return false")
 
 history.forward();
