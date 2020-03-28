@@ -12,12 +12,6 @@ To build the blockchain network, the first step is to generate artifacts for pee
 network_resources/crypto-config
 network_resources/config
 
-To build the network, run the following script.
-cd network
-chmod +x build.sh
-./build.sh
-
----------------------------------------------------------------------
 # To stop the running network, run the following script.
 cd network
 chmod +x stop.sh
@@ -28,7 +22,12 @@ chmod +x stop.sh
 cd network
 chmod +x teardown.sh
 ./teardown.sh
----------------------------------------------------------------------
+
+
+# To build the network, run the following script.
+cd network
+chmod +x build.sh
+./build.sh
 
 ---------------------------------------------------------------------------------------
 NOTE# You can skip Point 2. I've already generated the JAR file. Continue from Point 3.
@@ -68,9 +67,11 @@ Put the below line in editor (1 below means that your code will run every minute
 
 
 7. Perform Invoke and Query on network
-You don’t need to run this 1st command as cron job is already doing it for you
+You don’t need to run this 1st command as cron job is already doing it for you (Run this if you haven’t setup cron job)
 java -cp blockchain-client.jar org.example.chaincode.invocation.InvokeChaincode
 
 You can check entries into hyperledger by using this command
 java -cp blockchain-client.jar org.example.chaincode.invocation.QueryChaincode
+
+8. Make sure you have new approved transactions processed in last 15 mins in order to see new entries being written in hyperledger
 

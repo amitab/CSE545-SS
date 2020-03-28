@@ -73,7 +73,7 @@ public class InvokeChaincode {
 				channel.initialize();
 				
 		        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		        String query = "select id, decision_date, from_account, to_account, amount from Transaction where TIMESTAMPDIFF(MINUTE,decision_date,NOW()) < 15 and approval_status = 1";
+		        String query = "select id, decision_date, from_account, to_account, amount, transaction_type from Transaction where TIMESTAMPDIFF(MINUTE,decision_date,NOW()) < 15 and approval_status = 1";
 		        ResultSet rs = st.executeQuery(query);
 		        if(rs!=null) {
 		        	while(rs.next()) {
@@ -81,8 +81,8 @@ public class InvokeChaincode {
 						ChaincodeID ccid = ChaincodeID.newBuilder().setName(Config.CHAINCODE_1_NAME).build();
 						request.setChaincodeID(ccid);
 						request.setFcn("createTransaction");
-		        		String[] arr = new String[5];
-		        		for (int i = 1; i <= 5; i++) {
+		        		String[] arr = new String[6];
+		        		for (int i = 1; i <= 6; i++) {
 		        			arr[i-1] = rs.getString(i);
 		        	    }
 		        		request.setArgs(arr);

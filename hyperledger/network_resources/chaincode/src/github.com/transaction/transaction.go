@@ -48,6 +48,7 @@ type Transaction struct {
 	FromAccount string `json:"fromaccount"`
 	ToAccount  string `json:"toaccount"`
 	Amount   string `json:"amount"`
+	TransactionType string `json:"transactiontype"`
 }
 
 /*
@@ -92,9 +93,9 @@ func (s *SmartContract) queryTransaction(APIstub shim.ChaincodeStubInterface, ar
 
 func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
 	Transactions := []Transaction{
-		Transaction{DecisionDate: "2020-03-25 14:33:22", FromAccount: "4539309266608", ToAccount: "5379148778000788", Amount: "100"},
-		Transaction{DecisionDate: "2020-03-26 14:33:22", FromAccount: "4539309266609", ToAccount: "5379148778000789", Amount: "200"},
-		Transaction{DecisionDate: "2020-03-27 14:33:22", FromAccount: "4539309266607", ToAccount: "5379148778000787", Amount: "300"},
+		Transaction{DecisionDate: "2020-03-25 14:33:22", FromAccount: "4539309266608", ToAccount: "5379148778000788", Amount: "100", TransactionType: "transfer"},
+		Transaction{DecisionDate: "2020-03-26 14:33:22", FromAccount: "4539309266609", ToAccount: "5379148778000789", Amount: "200", TransactionType: "transfer"},
+		Transaction{DecisionDate: "2020-03-27 14:33:22", FromAccount: "4539309266607", ToAccount: "5379148778000787", Amount: "300", TransactionType: "transfer"},
 	}
 
 	i := 0
@@ -111,11 +112,11 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 
 func (s *SmartContract) createTransaction(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 5 {
-		return shim.Error("Incorrect number of arguments. Expecting 5")
+	if len(args) != 6 {
+		return shim.Error("Incorrect number of arguments. Expecting 6")
 	}
 
-	var Transaction = Transaction{DecisionDate: args[1], FromAccount: args[2], ToAccount: args[3], Amount: args[4]}
+	var Transaction = Transaction{DecisionDate: args[1], FromAccount: args[2], ToAccount: args[3], Amount: args[4],  TransactionType: args[5]}
 
 	TransactionAsBytes, _ := json.Marshal(Transaction)
 	APIstub.PutState(args[0], TransactionAsBytes)
