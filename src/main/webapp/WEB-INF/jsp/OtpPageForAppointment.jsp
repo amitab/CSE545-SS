@@ -41,7 +41,8 @@
 					</div> --%>
 					<div class="form-group">
 						<input class="input-lg form-control" type="number" id="otpnum"
-							step="1" name="otpnum" max="1000000" autofocus="true" required />
+							step="1" name="otpnum" max="1000000" autofocus="true" required
+							readonly />
 					</div>
 					<div class="row">
 						<div class="col-md-5 col-xs-5 col-sm-5">

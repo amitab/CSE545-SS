@@ -89,7 +89,7 @@
 						<div class="col-lg-5">
 							<input type="number" class="form-control input-lg form-control"
 								id="token" name="token" placeholder="OTP" step="1" max="1000000"
-								autofocus="true" required>
+								autofocus="true" required readonly>
 						</div>
 					</div>
 
@@ -105,6 +105,13 @@
 
 				</fieldset>
 			</form>
+		</div>
+
+		<div class="form-group"
+			style="background-color: #f1f1f1; height: 30px">
+			<span><a href="/login"
+				style="color: #685206; font-family: 'Helvetica Neue', sans-serif; font-size: 16px; line-height: 24px; margin: 0 0 24px;">Go
+					Back</a></span>
 		</div>
 
 	</div>
