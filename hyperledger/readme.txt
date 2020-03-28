@@ -51,7 +51,7 @@ cd ../../network_resources
 java -cp blockchain-client.jar org.example.network.CreateChannel
 
 
-4. Deploy & Instantiate the chaincode
+4. Deploy & Instantiate the chaincode (This might take some time)
 java -cp blockchain-client.jar org.example.network.DeployInstantiateChaincode
 
 
@@ -59,6 +59,18 @@ java -cp blockchain-client.jar org.example.network.DeployInstantiateChaincode
 java -cp blockchain-client.jar org.example.user.RegisterEnrollUser
 
 
-6. Perform Invoke and Query on network
+6. Add Cron Job
+Open cron job editor 
+crontab -e 
+
+Put the below line in editor (1 below means that your code will run every minute, this is just for testing. We would ideally have it for 10-15 mins)
+*/1 * * * * java -cp (full path to your project directory)/hyperledger/network_resources/blockchain-client.jar org.example.chaincode.invocation.InvokeChaincode
+
+
+7. Perform Invoke and Query on network
+You don’t need to run this 1st command as cron job is already doing it for you
 java -cp blockchain-client.jar org.example.chaincode.invocation.InvokeChaincode
+
+You can check entries into hyperledger by using this command
 java -cp blockchain-client.jar org.example.chaincode.invocation.QueryChaincode
+

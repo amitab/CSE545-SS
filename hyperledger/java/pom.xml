@@ -42,7 +42,23 @@
          <artifactId>fabric-sdk-java</artifactId>
          <version>1.4.1</version>
      </dependency>
-		
+     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+	<dependency>
+	    <groupId>mysql</groupId>
+	    <artifactId>mysql-connector-java</artifactId>
+	    <version>8.0.19</version>
+	</dependency>
+	<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20190722</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+		<dependency>
+		    <groupId>com.googlecode.json-simple</groupId>
+		    <artifactId>json-simple</artifactId>
+		    <version>1.1.1</version>
+	</dependency>
 	<!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
 	<dependency>
 		<groupId>javax.xml.bind</groupId>

@@ -1,16 +1,3 @@
-/****************************************************** 
- *  Copyright 2018 IBM Corporation 
- *  Licensed under the Apache License, Version 2.0 (the "License"); 
- *  you may not use this file except in compliance with the License. 
- *  You may obtain a copy of the License at 
- *  http://www.apache.org/licenses/LICENSE-2.0 
- *  Unless required by applicable law or agreed to in writing, software 
- *  distributed under the License is distributed on an "AS IS" BASIS, 
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *  See the License for the specific language governing permissions and 
- *  limitations under the License.
- */
-
 package org.example.client;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -39,13 +26,6 @@ import org.hyperledger.fabric.sdk.exception.ChaincodeEndorsementPolicyParseExcep
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
 
-/**
- * Wrapper class for a channel client.
- * 
- * @author Balaji Kadambi
- *
- */
-
 public class ChannelClient {
 
 	String name;
@@ -64,29 +44,12 @@ public class ChannelClient {
 		return fabClient;
 	}
 
-	/**
-	 * Constructor
-	 * 
-	 * @param name
-	 * @param channel
-	 * @param fabClient
-	 */
 	public ChannelClient(String name, Channel channel, FabricClient fabClient) {
 		this.name = name;
 		this.channel = channel;
 		this.fabClient = fabClient;
 	}
 
-	/**
-	 * Query by chaincode.
-	 * 
-	 * @param chaincodeName
-	 * @param functionName
-	 * @param args
-	 * @return
-	 * @throws InvalidArgumentException
-	 * @throws ProposalException
-	 */
 	public Collection<ProposalResponse> queryByChainCode(String chaincodeName, String functionName, String[] args)
 			throws InvalidArgumentException, ProposalException {
 		Logger.getLogger(ChannelClient.class.getName()).log(Level.INFO,
@@ -103,14 +66,6 @@ public class ChannelClient {
 		return response;
 	}
 
-	/**
-	 * Send transaction proposal.
-	 * 
-	 * @param request
-	 * @return
-	 * @throws ProposalException
-	 * @throws InvalidArgumentException
-	 */
 	public Collection<ProposalResponse> sendTransactionProposal(TransactionProposalRequest request)
 			throws ProposalException, InvalidArgumentException {
 		Logger.getLogger(ChannelClient.class.getName()).log(Level.INFO,
@@ -131,23 +86,6 @@ public class ChannelClient {
 		return response;
 	}
 
-	/**
-	 * 
-	 * Instantiate chaincode.
-	 * 
-	 * @param chaincodeName
-	 * @param version
-	 * @param chaincodePath
-	 * @param language
-	 * @param functionName
-	 * @param functionArgs
-	 * @param policyPath
-	 * @return
-	 * @throws InvalidArgumentException
-	 * @throws ProposalException
-	 * @throws ChaincodeEndorsementPolicyParseException
-	 * @throws IOException
-	 */
 	public Collection<ProposalResponse> instantiateChainCode(String chaincodeName, String version, String chaincodePath,
 			String language, String functionName, String[] functionArgs, String policyPath)
 			throws InvalidArgumentException, ProposalException, ChaincodeEndorsementPolicyParseException, IOException {
@@ -190,14 +128,6 @@ public class ChannelClient {
 		return responses;
 	}
 
-	/**
-	 * Query a transaction by id.
-	 * 
-	 * @param txnId
-	 * @return
-	 * @throws ProposalException
-	 * @throws InvalidArgumentException
-	 */
 	public TransactionInfo queryByTransactionId(String txnId) throws ProposalException, InvalidArgumentException {
 		Logger.getLogger(ChannelClient.class.getName()).log(Level.INFO,
 				"Querying by trasaction id " + txnId + " on channel " + channel.getName());

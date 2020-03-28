@@ -30,12 +30,6 @@ import org.hyperledger.fabric.sdk.Orderer;
 import org.hyperledger.fabric.sdk.Peer;
 import org.hyperledger.fabric.sdk.ProposalResponse;
 
-/**
- * 
- * @author Balaji Kadambi
- *
- */
-
 public class QueryChaincode {
 
 	private static final byte[] EXPECTED_EVENT_DATA = "!".getBytes(UTF_8);
@@ -67,22 +61,11 @@ public class QueryChaincode {
 			channel.initialize();
 
 			Logger.getLogger(QueryChaincode.class.getName()).log(Level.INFO, "Querying for all transactions ...");
-			Collection<ProposalResponse>  responsesQuery = channelClient.queryByChainCode("fabcar", "queryAllCars", null);
+			Collection<ProposalResponse>  responsesQuery = channelClient.queryByChainCode("transaction", "queryAllTransactions", null);
 			for (ProposalResponse pres : responsesQuery) {
 				String stringResponse = new String(pres.getChaincodeActionResponsePayload());
 				Logger.getLogger(QueryChaincode.class.getName()).log(Level.INFO, stringResponse);
 			}
-
-			Thread.sleep(10000);
-			String[] args1 = {"TXN1"};
-			Logger.getLogger(QueryChaincode.class.getName()).log(Level.INFO, "Querying for a transaction - " + args1[0]);
-			
-			Collection<ProposalResponse>  responses1Query = channelClient.queryByChainCode("fabcar", "queryCar", args1);
-			for (ProposalResponse pres : responses1Query) {
-				String stringResponse = new String(pres.getChaincodeActionResponsePayload());
-				Logger.getLogger(QueryChaincode.class.getName()).log(Level.INFO, stringResponse);
-			}		
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

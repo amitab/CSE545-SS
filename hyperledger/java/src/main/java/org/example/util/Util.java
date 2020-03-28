@@ -1,16 +1,3 @@
-/******************************************************
- *  Copyright 2018 IBM Corporation
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *  http://www.apache.org/licenses/LICENSE-2.0
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-
 package org.example.util;
 
 import java.io.BufferedReader;
@@ -38,20 +25,7 @@ import org.example.user.CAEnrollment;
 import org.example.user.UserContext;
 import org.hyperledger.fabric.sdk.exception.CryptoException;
 
-/**
- *
- * @author Balaji Kadambi
- *
- */
-
 public class Util {
-
-	/**
-	 * Serialize user
-	 *
-	 * @param userContext
-	 * @throws Exception
-	 */
 	public static void writeUserContext(UserContext userContext) throws Exception {
 		String directoryPath = "users/" + userContext.getAffiliation();
 		String filePath = directoryPath + "/" + userContext.getName() + ".ser";
@@ -69,14 +43,6 @@ public class Util {
 		file.close();
 	}
 
-	/**
-	 * Deserialize user
-	 *
-	 * @param affiliation
-	 * @param username
-	 * @return
-	 * @throws Exception
-	 */
 	public static UserContext readUserContext(String affiliation, String username) throws Exception {
 		String filePath = "users/" + affiliation + "/" + username + ".ser";
 		File file = new File(filePath);
@@ -96,18 +62,6 @@ public class Util {
 		return null;
 	}
 
-	/**
-	 * Create enrollment from key and certificate files.
-	 *
-	 * @param folderPath
-	 * @param keyFileName
-	 * @param certFileName
-	 * @return
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeySpecException
-	 * @throws CryptoException
-	 */
 	public static CAEnrollment getEnrollment(String keyFolderPath,  String keyFileName,  String certFolderPath, String certFileName)
 			throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, CryptoException {
 		PrivateKey key = null;
@@ -159,7 +113,6 @@ public class Util {
 	            }
 	        }
 
-	        // either file or an empty directory
 	        Logger.getLogger(Util.class.getName()).log(Level.INFO, "Deleting - " + dir.getName());
 	        return dir.delete();
 	    }
