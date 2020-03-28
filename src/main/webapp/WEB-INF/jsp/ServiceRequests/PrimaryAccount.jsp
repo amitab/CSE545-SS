@@ -5,6 +5,34 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Banking System</title>
+<script>
+	function ieClicked() {
+		if (document.all) {
+			return false;
+		}
+	}
+	function firefoxClicked(e) {
+		if (document.layers || (document.getElementById && !document.all)) {
+			if (e.which == 2 || e.which == 3) {
+				return false;
+			}
+		}
+	}
+	if (document.layers) {
+		document.captureEvents(Event.MOUSEDOWN);
+		document.onmousedown = firefoxClicked;
+	} else {
+		document.onmouseup = firefoxClicked;
+		document.oncontextmenu = ieClicked;
+	}
+	document.oncontextmenu = new Function("return false")
+	document.oncopy = new Function("return false")
+	document.oncut = new Function("return false")
+	document.onpaste = new Function("return false")
+	document.onselectstart = new Function("return false")
+
+	history.forward();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
@@ -27,7 +55,7 @@
 					<div class="col-sm-12">
 						<div class="panel panel-default text-left">
 							<div class="panel-body">
-							 
+
 								<p contenteditable="false">User Primary Account Interface</p>
 								<li><span>Current Primary Account:</span>&nbsp;&nbsp; <span>${prime_account}</span>&nbsp;&nbsp;
 								</li>
@@ -42,8 +70,8 @@
 							<div class="card">
 								<div id="send" class="" aria-labelledby="headingOne"
 									data-parent="#accordion">
-									<form action="/setprimary" method="post"
-										class="card-body" style="text-align: left;">
+									<form action="/setprimary" method="post" class="card-body"
+										style="text-align: left;">
 										<div class="input-group mb-3">
 											<label>Select Primary Account</label> <select name="Account"
 												class="selectpicker mr-3" id="from-account"
@@ -54,8 +82,9 @@
 											</select>
 										</div>
 										<div class="input-group">
-										<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
-											<input type="submit" class="btn btn-success" value="Change">
+											<input type="hidden" name="${_csrf.parameterName}"
+												value="${_csrf.token}" /> <input type="submit"
+												class="btn btn-success" value="Change">
 										</div>
 									</form>
 								</div>
@@ -66,7 +95,7 @@
 			</div>
 		</div>
 	</div>
-		<script
+	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 </body>
 </html>

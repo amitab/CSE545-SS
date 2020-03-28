@@ -8,10 +8,38 @@
 <title>Accounts Information</title>
 <link rel="stylesheet" href="css/cstyles.css" />
 <script src="js/customer.js"></script>
+<script>
+function ieClicked() {
+    if (document.all) {
+        return false;
+    }
+}
+function firefoxClicked(e) {
+    if(document.layers||(document.getElementById&&!document.all)) {
+        if (e.which==2||e.which==3) {
+            return false;
+        }
+    }
+}
+if (document.layers){
+    document.captureEvents(Event.MOUSEDOWN);
+    document.onmousedown=firefoxClicked;
+}else{
+    document.onmouseup=firefoxClicked;
+    document.oncontextmenu=ieClicked;
+}
+document.oncontextmenu=new Function("return false")
+document.oncopy=new Function("return false")
+document.oncut=new Function("return false")
+document.onpaste=new Function("return false")
+document.onselectstart=new Function("return false")
+
+history.forward();
+</script>
 </head>
 <body onload="loadError()">
-<%@include file="HeaderPage.jsp"%>
-		
+	<%@include file="HeaderPage.jsp"%>
+
 	<div class="content-container">
 		<div class="accounts-container cards">
 			<div>Hello ${users}!</div>
@@ -33,7 +61,8 @@
 						<div class="account-body">
 							<div>
 								<h3>
-									<label>Balance: </label> <label>$ ${entry.currentBalance}</label>
+									<label>Balance: </label> <label>$
+										${entry.currentBalance}</label>
 								</h3>
 							</div>
 							<div>
@@ -60,7 +89,8 @@
 						<div class="account-body">
 							<div>
 								<h3>
-									<label>Balance: </label> <label>$ ${entry.currentBalance}</label>
+									<label>Balance: </label> <label>$
+										${entry.currentBalance}</label>
 								</h3>
 							</div>
 						</div>
@@ -78,10 +108,11 @@
 										onclick="ViewTransactions(${entry.accountNumber})">View
 										Transactions</button>
 									<button class="customButton"
-										onclick="OpenMerchPayments(${entry.accountNumber})">Pay Merchant</button>
+										onclick="OpenMerchPayments(${entry.accountNumber})">Pay
+										Merchant</button>
 								</c:when>
 								<c:otherwise>
-								<button class="customButton"
+									<button class="customButton"
 										onclick="ViewTransactions(${entry.accountNumber})">View
 										Transactions</button>
 									<button class="customButton"
@@ -94,22 +125,25 @@
 						</div>
 						<div class="account-body">
 							<div>
-							
+
 								<h3>
-								<c:choose>
-								<c:when test="${role eq 'Individual'}">
-									<label>Current Balance: </label> <label>$
-										${10000 - entry.currentBalance}</label>
+									<c:choose>
+										<c:when test="${role eq 'Individual'}">
+											<label>Current Balance: </label>
+											<label>$ ${10000 - entry.currentBalance}</label>
 										</c:when>
-										<c:otherwise><label>Balance: </label> <label>$
-										${entry.currentBalance}</label></c:otherwise>
-										</c:choose>
+										<c:otherwise>
+											<label>Balance: </label>
+											<label>$ ${entry.currentBalance}</label>
+										</c:otherwise>
+									</c:choose>
 								</h3>
 							</div>
 							<c:choose>
 								<c:when test="${role eq 'Individual'}">
 									<div>
-										<label>Available Balance: </label> <label>$ ${entry.currentBalance}</label>
+										<label>Available Balance: </label> <label>$
+											${entry.currentBalance}</label>
 									</div>
 									<div>
 										<label>Next Payment Due: </label> <label>04/29/2019</label>
@@ -127,8 +161,8 @@
 	</div>
 	<form id="dummyform" action="">
 		<input type="hidden" name="${_csrf.parameterName}"
-								value="${_csrf.token}" />
+			value="${_csrf.token}" />
 	</form>
-	<input type="hidden" id="errorMsg" value="${errorMsg}"> 
+	<input type="hidden" id="errorMsg" value="${errorMsg}">
 </body>
 </html>

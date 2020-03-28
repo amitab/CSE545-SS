@@ -17,6 +17,34 @@
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
 <link rel="stylesheet" href="css/index.css">
+<script>
+	function ieClicked() {
+		if (document.all) {
+			return false;
+		}
+	}
+	function firefoxClicked(e) {
+		if (document.layers || (document.getElementById && !document.all)) {
+			if (e.which == 2 || e.which == 3) {
+				return false;
+			}
+		}
+	}
+	if (document.layers) {
+		document.captureEvents(Event.MOUSEDOWN);
+		document.onmousedown = firefoxClicked;
+	} else {
+		document.onmouseup = firefoxClicked;
+		document.oncontextmenu = ieClicked;
+	}
+	document.oncontextmenu = new Function("return false")
+	document.oncopy = new Function("return false")
+	document.oncut = new Function("return false")
+	document.onpaste = new Function("return false")
+	document.onselectstart = new Function("return false")
+
+	history.forward();
+</script>
 </head>
 
 <body>
@@ -34,7 +62,7 @@
 								<p>
 								<li><span>Account Number: ${accountid}</span> <span>Balance:
 										$ ${balance}</span></li>
-										 
+
 								</p>
 							</div>
 						</div>
@@ -61,10 +89,12 @@
 										<div class="input-group mb-3">
 											<label>Deposit Amount</label> <input type="number"
 												class="form-control" min="1" max="${100000}"
-												placeholder="Deposit Amount" name="Amount" required="required">
+												placeholder="Deposit Amount" name="Amount"
+												required="required">
 										</div>
-										<input type="hidden" name="Deposit" value="sys"/>
-										<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
+										<input type="hidden" name="Deposit" value="sys" /> <input
+											type="hidden" name="${_csrf.parameterName}"
+											value="${_csrf.token}" />
 										<div class="input-group">
 											<input type="submit" class="btn btn-success" value="Deposit">
 										</div>
@@ -88,10 +118,12 @@
 										<div class="input-group mb-3">
 											<label>Withdrawal Amount</label> <input type="number"
 												class="form-control" min="1" max="${balance}"
-												placeholder="Withdrawal Amount" name="Amount" required="required">
+												placeholder="Withdrawal Amount" name="Amount"
+												required="required">
 										</div>
-										<input type="hidden" name="Withdraw" value="sys"/>
-										<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
+										<input type="hidden" name="Withdraw" value="sys" /> <input
+											type="hidden" name="${_csrf.parameterName}"
+											value="${_csrf.token}" />
 										<div class="input-group">
 											<input type="submit" class="btn btn-success" value="Withdraw">
 										</div>

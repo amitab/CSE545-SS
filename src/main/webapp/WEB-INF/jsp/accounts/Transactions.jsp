@@ -17,6 +17,34 @@
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
 <link rel="stylesheet" href="css/index.css">
+<script>
+	function ieClicked() {
+		if (document.all) {
+			return false;
+		}
+	}
+	function firefoxClicked(e) {
+		if (document.layers || (document.getElementById && !document.all)) {
+			if (e.which == 2 || e.which == 3) {
+				return false;
+			}
+		}
+	}
+	if (document.layers) {
+		document.captureEvents(Event.MOUSEDOWN);
+		document.onmousedown = firefoxClicked;
+	} else {
+		document.onmouseup = firefoxClicked;
+		document.oncontextmenu = ieClicked;
+	}
+	document.oncontextmenu = new Function("return false")
+	document.oncopy = new Function("return false")
+	document.oncut = new Function("return false")
+	document.onpaste = new Function("return false")
+	document.onselectstart = new Function("return false")
+
+	history.forward();
+</script>
 
 </head>
 <body>
@@ -30,7 +58,8 @@
 							<div class="panel-body">
 								<p contenteditable="false">${accountType}Detail</p>
 								<p>
-								<input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
+									<input type="hidden" name="${_csrf.parameterName}"
+										value="${_csrf.token}" />
 								<li><span>Account Number: ${accountid}</span>&nbsp;&nbsp; <span>$
 										${balance}</span>&nbsp;&nbsp; <span style="float: right;">Placeholder</span></li>
 								</p>
@@ -49,8 +78,9 @@
 							<div class="col-sm-9">
 								<div class="well">
 									<p align="left">
-									<span>Transaction Date: </span> <span>${transaction.date}</span>
-										<b style="float: right;"> <span>Status: </span> <span> <c:choose>
+										<span>Transaction Date: </span> <span>${transaction.date}</span>
+										<b style="float: right;"> <span>Status: </span> <span>
+												<c:choose>
 													<c:when test="${transaction.approvalStatus}">Approved</c:when>
 													<c:otherwise>Pending</c:otherwise>
 												</c:choose>
@@ -92,7 +122,8 @@
 			</div>
 			<div class="col-sm-4 well" id="transfer">
 				<div class="thumbnail">
-					<button id="cmd" class="btn btn-success" onclick="return downloader();">Statement Download</button>
+					<button id="cmd" class="btn btn-success"
+						onclick="return downloader();">Statement Download</button>
 				</div>
 				<div class="well">
 					<p>Account Holder</p>
@@ -102,16 +133,12 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-	function downloader()
-	{
-		var doc = new jsPDF();         
-		var source = window.document.getElementById("credit");
-		doc.fromHTML(
-		    source,
-		    15,
-		    15);
-		doc.save('account_statement.pdf');
-	}
+		function downloader() {
+			var doc = new jsPDF();
+			var source = window.document.getElementById("credit");
+			doc.fromHTML(source, 15, 15);
+			doc.save('account_statement.pdf');
+		}
 	</script>
 </body>
 </html>

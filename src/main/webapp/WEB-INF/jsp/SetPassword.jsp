@@ -1,7 +1,36 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="js/EmployeeValidate.js"></script>
 <script src="js/jquery.validate.js"></script>
+<script>
+	function ieClicked() {
+		if (document.all) {
+			return false;
+		}
+	}
+	function firefoxClicked(e) {
+		if (document.layers || (document.getElementById && !document.all)) {
+			if (e.which == 2 || e.which == 3) {
+				return false;
+			}
+		}
+	}
+	if (document.layers) {
+		document.captureEvents(Event.MOUSEDOWN);
+		document.onmousedown = firefoxClicked;
+	} else {
+		document.onmouseup = firefoxClicked;
+		document.oncontextmenu = ieClicked;
+	}
+	document.oncontextmenu = new Function("return false")
+	document.oncopy = new Function("return false")
+	document.oncut = new Function("return false")
+	document.onpaste = new Function("return false")
+	document.onselectstart = new Function("return false")
+
+	history.forward();
+</script>
 <div class="content-wrapper">
 	<div id="page-content" class="col-md-12" align="center">
 		<div class="panel panel-primary">
@@ -9,24 +38,31 @@
 				<h3 class="panel-title">Set New Password</h3>
 			</div>
 			<div class="panel-body">
-				<form id="SetPassword" action="/setpassword" class="form-horizontal" method="post">
+				<form id="SetPassword" action="/setpassword" class="form-horizontal"
+					method="post">
 					<fieldset>
 						<div class="form-group">
-							<label for="email" class="col-lg-2 control-label">User Name</label>
+							<label for="email" class="col-lg-2 control-label">User
+								Name</label>
 							<div class="col-lg-5">
-								<input type="text" id="username" name="username" class="form-control" placeholder="User Name" required>
+								<input type="text" id="username" name="username"
+									class="form-control" placeholder="User Name" required>
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="password" class="col-lg-2 control-label">Password</label>
 							<div class="col-lg-5">
-								<input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+								<input type="password" id="password" name="password"
+									class="form-control" placeholder="Password" required>
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="confirmpassword" class="col-lg-2 control-label">Confirm Password</label>
+							<label for="confirmpassword" class="col-lg-2 control-label">Confirm
+								Password</label>
 							<div class="col-lg-5">
-								<input type="password" id="confirmpassword" name="confirmpassword" class="form-control" placeholder="Confirm Password" required>
+								<input type="password" id="confirmpassword"
+									name="confirmpassword" class="form-control"
+									placeholder="Confirm Password" required>
 							</div>
 						</div>
 						<div class="form-group">
@@ -35,7 +71,7 @@
 								<button id="set_password" name="action" value="set_password">Submit</button>
 								<input type="hidden" name="${_csrf.parameterName}"
 									value="${_csrf.token}" />
-									 
+
 								<p>${message}</p>
 							</div>
 						</div>
