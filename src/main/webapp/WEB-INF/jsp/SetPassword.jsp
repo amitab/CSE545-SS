@@ -1,36 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="js/EmployeeValidate.js"></script>
-<script src="js/jquery.validate.js"></script>
-<script>
-	function ieClicked() {
-		if (document.all) {
-			return false;
-		}
-	}
-	function firefoxClicked(e) {
-		if (document.layers || (document.getElementById && !document.all)) {
-			if (e.which == 2 || e.which == 3) {
-				return false;
-			}
-		}
-	}
-	if (document.layers) {
-		document.captureEvents(Event.MOUSEDOWN);
-		document.onmousedown = firefoxClicked;
-	} else {
-		document.onmouseup = firefoxClicked;
-		document.oncontextmenu = ieClicked;
-	}
-	document.oncontextmenu = new Function("return false")
-	document.oncopy = new Function("return false")
-	document.oncut = new Function("return false")
-	document.onpaste = new Function("return false")
-	document.onselectstart = new Function("return false")
-
-	history.forward();
-</script>
+<script src="/js/EmployeeValidate.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script src="/js/security.js"></script>
 <div class="content-wrapper">
 	<div id="page-content" class="col-md-12" align="center">
 		<div class="panel panel-primary">
