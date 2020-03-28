@@ -36,9 +36,6 @@
 <link rel="stylesheet" href="css/loginCSS.css">
 <title>Sun Devil Bank</title>
 <script src="https://www.google.com/recaptcha/api.js"></script>
-<script>
-	history.forward();
-</script>
 </head>
 
 <div class="panel-heading" align="center">

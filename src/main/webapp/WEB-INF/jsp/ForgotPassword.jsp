@@ -20,6 +20,7 @@
 	src="https://cdnjs.cloudflare.com/ajax/libs/virtual-keyboard/1.30.1/js/jquery.keyboard.extension-typing.min.js">
 	
 </script>
+
 <script>
 	function ieClicked() {
 		if (document.all) {
@@ -48,6 +49,7 @@
 
 	history.forward();
 </script>
+
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/virtual-keyboard/1.30.1/css/keyboard.min.css">
 <link rel="stylesheet"
@@ -56,6 +58,7 @@
 <body>
 	<div id="page-content" class="col-md-12" align="center">
 		<div>
+
 			<div>
 				<h3>
 					<b>Forgot Password</b>
@@ -66,6 +69,7 @@
 			</div>
 
 			<div>
+
 				<form id="ForgotPassword" action="/forgot_password" method="post">
 					<fieldset>
 						<div>

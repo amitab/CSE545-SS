@@ -60,7 +60,7 @@
 						<li class="cta"><a class="ButtonDesign"
 							href="/ViewAppointments">View Appointments of the day</a></li>
 						<form method="post" action="/perform_logout" id="form-logout">
-							<button type="submit">Logout</button>
+							<input type="submit" value="Logout" />
 							<input type="hidden" name="${_csrf.parameterName}"
 								value="${_csrf.token}" />
 						</form>
