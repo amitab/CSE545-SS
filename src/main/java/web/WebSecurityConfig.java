@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.stereotype.Component;
 
 @Configuration
@@ -99,6 +100,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		    .logoutSuccessUrl("/login");
         http.requiresChannel().anyRequest().requiresSecure();
         http.sessionManagement().maximumSessions(1);
+        http.headers()
+        	.xssProtection()
+            .disable()
+            .httpStrictTransportSecurity();
+//            .addHeaderWriter(new StaticHeadersWriter("X-Content-Security-Policy","script-src 'self'"));
     }
      
     @Bean
