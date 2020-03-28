@@ -18,7 +18,7 @@ implements AuthenticationFailureHandler {
 			org.springframework.security.core.AuthenticationException exception) throws IOException, ServletException {
 	    response.setStatus(HttpStatus.UNAUTHORIZED.value());
 	    HttpSession session = request.getSession(false);
-	    session.setAttribute("msg", exception.getMessage());
+	    session.setAttribute("msg", "Invalid credentials.");
 	    
 	    response.sendRedirect("/login?error=true");
 	}
