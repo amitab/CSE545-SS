@@ -95,6 +95,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		    .deleteCookies("JSESSIONID")
 		    .logoutSuccessUrl("/login");
         http.requiresChannel().anyRequest().requiresSecure();
+        http.sessionManagement().maximumSessions(1);
     }
      
     @Bean
