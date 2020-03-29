@@ -93,6 +93,7 @@ public class AdminController {
 		else
 			if (employeeSearchForm.getEmployeeSearchs().size()==0) {
 				model.addAttribute("message", "An username not found");
+				model.addAttribute("employeeForm", new EmployeeSearch());
 				return "AdminEmployeeUpdate";
 			} else {
 				System.out.println("CAME HERE!!!!!!");

@@ -12,7 +12,7 @@
 	<div class="col-md-12" id="page-content" align="center">
 		<div class="panel panel-primary">
 			<div class="panel-heading">
-				<h3 class="panel-title">Employee Update</h3>
+				<h3 class="panel-title">Customer Update</h3>
 			</div>
 			<div class="panel-body">
 				<form class="form-horizontal" id="EmployeeUpdateSearch"

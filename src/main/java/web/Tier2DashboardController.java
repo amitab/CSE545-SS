@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.hibernate.Session;
@@ -261,19 +262,14 @@ public class Tier2DashboardController {
 			if(employeeSearchForm.getEmployeeSearchs().size()==0)
 			{
 				model.addAttribute("message", "An username not found");
+				model.addAttribute("userForm", new EmployeeSearch());
 				return "Tier2CustomerUpdate";
 			}		
 			else
 				{
 				System.out.println("CAME HERE!!!!!!");
 				System.out.println(employeeSearchForm.employeeSearchs.get(0).getEmail());
-				model.addAttribute("userName", username);
 				model.addAttribute("userForm",employeeSearchForm.employeeSearchs.get(0));
-//				model.addAttribute("email",employeeSearchForm.employeeSearchs.get(0).getEmail());
-//				model.addAttribute("firstName",employeeSearchForm.employeeSearchs.get(0).getFirstName());
-//				model.addAttribute("lastName",employeeSearchForm.employeeSearchs.get(0).getLastName());
-//				model.addAttribute("middleName",employeeSearchForm.employeeSearchs.get(0).getMiddleName());
-//				model.addAttribute("phoneNumber",employeeSearchForm.employeeSearchs.get(0).getPhoneNumber());
 				return "Tier2CustomerUpdate";
 				}
     }
