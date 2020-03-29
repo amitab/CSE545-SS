@@ -17,6 +17,7 @@
 						<li><a href="/Admin/UpdateEmployee">Modify Employee</a></li>
 						<li><a href="/Admin/DeleteEmployee">Delete Employee</a></li>
 						<li><a href="/Admin/SystemLogs">System Logs</a></li>
+						<li><a href="/profile/change_password">Change Password</a></li>
 						<form method="post" action="/perform_logout" id="form-logout">
 							<input type="submit" value="Logout" />
 							<input type="hidden" name="${_csrf.parameterName}"
