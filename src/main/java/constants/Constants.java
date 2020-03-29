@@ -39,8 +39,8 @@ public final class Constants {
     public static final String employeeRolePattern = "^(tier1)|(tier2)$";
     public static final String employeeRoleErrorMessage = "You can register only as a Tier1 or a Tier2 Employee.";
     
-    public static final String dateOfBirthPattern = "yyyy-MM-dd";
-    public static final String dateOfBirthErrorMessage = "Date of Birth should be of the form YYYY-MM-DD";
+    public static final String dateOfBirthPattern = "^\\d{2}\\/\\d{2}\\/\\d{4}$";
+    public static final String dateOfBirthErrorMessage = "Date of Birth should be of the form MM/DD/YYYY in numbers.";
     
     public static final String ssnPattern = "^[0-9]{3}\\-?[0-9]{2}\\-?[0-9]{4}$";
     public static final String ssnErrorMessage = "SSN must consist of numbers of length 9";

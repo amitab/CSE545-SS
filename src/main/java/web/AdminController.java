@@ -156,14 +156,21 @@ public class AdminController {
         	return new ModelAndView("AdminRegistrationExternal");
         }
 
-		Boolean flag=employeeServiceImpl.createEmployee(employeeForm.createUser(passwordEncoder));
+        Boolean flag = null;
+        try {
+        	flag = employeeServiceImpl.createEmployee(employeeForm.createUser(passwordEncoder));
+        } catch (Exception e) {
+        	flag = false;
+        	e.printStackTrace();
+        }
+
 		if(flag==null)
 			return new ModelAndView("Login");
 		else
 			if(flag)
 				return new ModelAndView("AdminRegistrationExternal","message","Account was successfully created");
 			else
-				return new ModelAndView("AdminRegistrationExternal","message","An Active Username was already found");	
+				return new ModelAndView("AdminRegistrationExternal","message","Could not create an account");	
     }
 
 

@@ -1,17 +1,16 @@
 package forms;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Pattern.Flag;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import bankApp.repositories.UserServiceRepository;
@@ -61,10 +60,9 @@ public class UserForm {
 	@Pattern(regexp=Constants.phoneNumberPattern, message=Constants.phoneNumberErrorMessage)
 	protected String phone;
 
-	@NotNull
-    @DateTimeFormat(pattern=Constants.dateOfBirthPattern)
-	@Past
-	protected Date dateOfBirth;
+	@NotBlank
+	@Pattern(regexp=Constants.dateOfBirthPattern, message=Constants.dateOfBirthErrorMessage)
+	protected String dateOfBirth;
 
 	@NotBlank
 	@Pattern(regexp=Constants.ssnPattern, message=Constants.ssnErrorMessage)
@@ -97,11 +95,28 @@ public class UserForm {
 	  try {
 		  return !UserServiceRepository.userExists(this.username, this.email, this.ssn);
 	  } catch (Exception e) {
+		  e.printStackTrace();
 		  // Dont care
 	  }
 	  return true;
 	}
 
+	@AssertTrue(message="Date of birth must of the format MM/DD/YYYY and must be in the past")
+	public boolean getIsValidDate() {
+	  if (this.dateOfBirth == null)
+		  return true;
+	  
+	  try {
+		  Date date = new SimpleDateFormat("MM/dd/yyyy").parse(dateOfBirth);
+		  if (date.after(new Date()))
+			  return false;
+	  } catch (Exception e) {
+		  return false;
+	  }
+
+	  return true;
+	}
+	
 	@AssertTrue(message="Passwords do not match")
 	public boolean getIsValid() {
 	  if (this.password == null || this.confirmpassword == null)
@@ -165,11 +180,11 @@ public class UserForm {
 		this.phone = phone;
 	}
 
-	public Date getDateOfBirth() {
+	public String getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(Date dateOfBirth) {
+	public void setDateOfBirth(String dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
@@ -245,7 +260,7 @@ public class UserForm {
 		this.confirmpassword = confirmpassword;
 	}
 
-	public User createUser(PasswordEncoder passwordEncoder) {
+	public User createUser(PasswordEncoder passwordEncoder) throws ParseException {
 		User user = new User();
 		user.setUsername(this.username);
 		user.setPassword(passwordEncoder.encode(this.password));
@@ -264,7 +279,10 @@ public class UserForm {
 		userDetail.setAddress1(this.address1);
 		userDetail.setAddress2(this.address2);
 		userDetail.setCity(this.city);
-		userDetail.setDateOfBirth(this.dateOfBirth);
+		
+		Date date = new SimpleDateFormat("mm/dd/yyyy").parse(dateOfBirth);
+		
+		userDetail.setDateOfBirth(date);
 		userDetail.setProvince(this.province);
 		userDetail.setSsn(this.ssn);
 		userDetail.setZip(Long.parseLong(this.zip));

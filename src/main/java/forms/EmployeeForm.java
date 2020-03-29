@@ -1,5 +1,7 @@
 package forms;
 
+import java.text.ParseException;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
@@ -21,7 +23,7 @@ public class EmployeeForm extends UserForm {
 		this.designation = designation;
 	}
 	
-	public User createUser(PasswordEncoder passwordEncoder) {
+	public User createUser(PasswordEncoder passwordEncoder) throws ParseException {
 		User user = super.createUser(passwordEncoder);
 		user.setRole(this.designation);
 		

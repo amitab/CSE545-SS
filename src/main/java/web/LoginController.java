@@ -284,11 +284,9 @@ public class LoginController {
             session.save(user);
             session.save(user.getUserDetail());
 
-            if (tx.isActive())
-                tx.commit();
+            if (tx.isActive()) tx.commit();
         } catch (Exception e) {
-            if (tx != null)
-                tx.rollback();
+            if (tx != null) tx.rollback();
             e.printStackTrace();
             model.put("message", "Unable to register. Please contact the bank.");
             return new ModelAndView("RegistrationExternal");
