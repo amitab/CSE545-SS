@@ -18,70 +18,77 @@ import bankApp.repositories.UserServiceRepository;
 import model.User;
 import model.UserDetail;
 
+import constants.Constants;
+
 
 public class UserForm {
     @NotEmpty
     @Email
-    private String email;
+    protected String email;
 
 	@NotBlank
-	@Pattern(regexp = "^(?=.*\\d).{4,10}$", message="Password must be between 4 and 8 digits long and include at least one numeric digit.", flags = Flag.UNICODE_CASE)
-	private String password;
+	@Pattern(regexp=Constants.passwordPattern, message=Constants.passwordErrorMessage, flags = Flag.UNICODE_CASE)
+	protected String password;
 
 	@NotBlank
-	@Pattern(regexp = "^(?=.*\\d).{4,10}$", message="Password must be between 4 and 10 digits long and include at least one numeric digit.", flags = Flag.UNICODE_CASE)
-	private String confirmpassword;
+	@Pattern(regexp=Constants.passwordPattern, message=Constants.passwordErrorMessage, flags = Flag.UNICODE_CASE)
+	protected String confirmpassword;
 
 	@NotBlank
-	@Pattern(regexp = "^[^!@#~$%^&*\\(\\)-\\+=\\[\\]\\{\\};:'\"<>,/\\?`].+{5,}$", message="Username cannot contain special characters. It can only contain alphabets, numbers, underscores and periods.", flags = Flag.UNICODE_CASE)
-	private String username;
+	@Pattern(regexp=Constants.userNamePattern, message=Constants.userNameErrorMessage, flags = Flag.UNICODE_CASE)
+	protected String username;
 
 	@NotBlank
-	private String firstname;
+	@Pattern(regexp=Constants.namePattern, message=Constants.nameMessage)
+	protected String firstname;
 
-	private String middlename;
-
-	@NotBlank
-	private String lastname;
-
-	@NotBlank
-	@Pattern(regexp = "^(customer)|(merchant)$", message="You can register only as a customer or a merchant.")
-	private String designation;
+	@Pattern(regexp=Constants.namePattern, message=Constants.nameMessage)
+	protected String middlename;
 
 	@NotBlank
-	private String address1;
+	@Pattern(regexp=Constants.namePattern, message=Constants.nameMessage)
+	protected String lastname;
 
 	@NotBlank
-	private String address2;
+	@Pattern(regexp=Constants.addressPattern, message=Constants.addressErrorMessage)
+	protected String address1;
 
 	@NotBlank
-	@Pattern(regexp = "^\\+\\d{11}$", message="Phone number must be of the form +1XXXXXXXXXX (US Customers only)")
-	private String phone;
+	@Pattern(regexp=Constants.addressPattern, message=Constants.addressErrorMessage)
+	protected String address2;
+
+	@NotBlank
+	@Pattern(regexp=Constants.phoneNumberPattern, message=Constants.phoneNumberErrorMessage)
+	protected String phone;
 
 	@NotNull
-    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @DateTimeFormat(pattern=Constants.dateOfBirthPattern)
 	@Past
-	private Date dateOfBirth;
+	protected Date dateOfBirth;
 
 	@NotBlank
-	@Pattern(regexp = "^\\d{9}$", message="SSN must consist of numbers of length 9")
-	private String ssn;
+	@Pattern(regexp=Constants.ssnPattern, message=Constants.ssnErrorMessage)
+	protected String ssn;
 
 	@NotBlank
-	private String secquestion1;
+	@Pattern(regexp=Constants.secPattern, message=Constants.secMessage)
+	protected String secquestion1;
 
 	@NotBlank
-	private String secquestion2;
+	@Pattern(regexp=Constants.secPattern, message=Constants.secMessage)
+	protected String secquestion2;
 
 	@NotBlank
-	private String city;
+	@Pattern(regexp=Constants.locationPattern, message=Constants.locationErrorMessage)
+	protected String city;
 
 	@NotBlank
-	private String province;
+	@Pattern(regexp=Constants.locationPattern, message=Constants.locationErrorMessage)
+	protected String province;
 
 	@NotBlank
-	@Pattern(regexp = "^\\d+$", message="Zip code must be numbers")
-	private String zip;
+	@Pattern(regexp=Constants.zipPattern, message=Constants.zipErrorMessage)
+	protected String zip;
 
 	@AssertTrue(message="User already exists in the database")
 	public boolean getAlreadyExists() {
@@ -148,14 +155,6 @@ public class UserForm {
 
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
-	}
-
-	public String getDesignation() {
-		return designation;
-	}
-
-	public void setDesignation(String designation) {
-		this.designation = designation;
 	}
 
 	public String getPhone() {
@@ -250,7 +249,6 @@ public class UserForm {
 		User user = new User();
 		user.setUsername(this.username);
 		user.setPassword(passwordEncoder.encode(this.password));
-		user.setRole(this.designation);
 		user.setStatus(0);
 		user.setIncorrectAttempts(0);
 		user.setCreatedDate(new Date());
