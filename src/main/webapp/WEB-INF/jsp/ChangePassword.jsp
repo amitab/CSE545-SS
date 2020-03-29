@@ -42,7 +42,7 @@
 						<div class="col-lg-5">
 							<form:password cssClass="form-control" path="password"
 								id="password" name="password" placeholder="New Password"
-								required="true" />
+								required="true" autocomplete="off" />
 							<form:errors path="password" cssClass="error" />
 						</div>
 					</div>
@@ -53,7 +53,8 @@
 						<div class="col-lg-5">
 							<form:password cssClass="form-control" path="confirmpassword"
 								id="confirmpassword" name="confirmpassword"
-								placeholder="Confirm Password" required="true" />
+								placeholder="Confirm Password" required="true"
+								autocomplete="off" />
 							<form:errors path="confirmpassword" cssClass="error" />
 						</div>
 					</div>

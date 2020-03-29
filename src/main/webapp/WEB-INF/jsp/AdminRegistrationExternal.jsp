@@ -3,7 +3,8 @@
 	pageEncoding="UTF-8"%>
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="/js/cust_validate.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 <script src="/js/security.js"></script>
 <div class="content-wrapper">
 	<%@include file="HPT3.jsp"%>
@@ -20,13 +21,13 @@
 							<p>${message}</p>
 						</div>
 						<div class="form-group">
-							<label for="select" class="col-lg-2 control-label">Customer
+							<label for="select" class="col-lg-2 control-label">Employee
 								Type</label>
 							<div class="col-lg-5">
 								<select class="form-control" name="designation" id="designation">
 									<option value="">Select Option</option>
-									<option value="tier1">tier 1</option>
-									<option value="tier2">tier 2</option>
+									<option value="tier1">Tier 1</option>
+									<option value="tier2">Tier 2</option>
 								</select>
 							</div>
 						</div>
@@ -67,7 +68,8 @@
 								Password</label>
 							<div class="col-lg-5">
 								<input type="password" class="form-control" name="password"
-									id="password" placeholder="Password">
+									id="password" placeholder="Password" required="true"
+									autocomplete="off">
 							</div>
 						</div>
 						<div class="form-group">
@@ -76,7 +78,8 @@
 							<div class="col-lg-5">
 								<input type="password" class="form-control"
 									name="confirmpassword" id="confirmpassword"
-									placeholder="Confirm Password">
+									placeholder="Confirm Password" autocomplete="off"
+									required="true">
 							</div>
 						</div>
 						<div class="form-group">
