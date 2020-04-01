@@ -62,16 +62,10 @@
 								data-parent="#accordion">
 								<form method="post" class="card-body" action="/paymentcc"
 									class="card-body" style="text-align: left;">
-									<div class="input-group mb-3">
-										<label>Merchant ID</label> <input type="text"
-											pattern="[0-9A-Za-z]{,30}" class="form-control"
-											placeholder="Merchant Account Number" name="MerchantID"
-											aria-describedby="basic-addon1">
-									</div>
-									<div class="input-group mb-3">
-										<label>Merchant Account Number</label> <input type="number"
+																		<div class="input-group mb-3">
+										<label> Account Number</label> <input type="number"
 											step="1" pattern="[0-9]{,5}" class="form-control"
-											placeholder="Merchant Account Number" name="Account"
+											placeholder="Account Number" name="Account"
 											aria-describedby="basic-addon1">
 									</div>
 									<div class="input-group mb-3">
@@ -93,8 +87,6 @@
 								</form>
 							</div>
 						</div>
-					</c:otherwise>
-				</c:choose>
 			</div>
 		</div>
 	</div>
