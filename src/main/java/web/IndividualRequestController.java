@@ -285,8 +285,8 @@ public class IndividualRequestController {
 				account.setCurrentBalance(new BigDecimal(5.0));
 			}
 			else {
-				account.setInterest(new BigDecimal(10000.0));
-				account.setCurrentBalance(new BigDecimal(-10.0));
+				account.setInterest(new BigDecimal(-10.0));
+				account.setCurrentBalance(new BigDecimal(10000.0));
 			}
 			account.setDefaultFlag(0);
 			account.setStatus(0);
