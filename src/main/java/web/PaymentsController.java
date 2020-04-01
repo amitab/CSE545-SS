@@ -48,7 +48,7 @@ public class PaymentsController {
 		String lastname= (String)request.getParameter("Reciepient Last Name");
 		String amo = request.getParameter("Amount").toString();
 		BigDecimal amount = new BigDecimal(amo);
-		String payeracc = session.getAttribute("SelectedAmount").toString();
+		String payeracc = session.getAttribute("SelectedAccount").toString();
 		boolean accountExists =false;
 		boolean depo=false,with=false, successfulTransactoin=false;
 		try {

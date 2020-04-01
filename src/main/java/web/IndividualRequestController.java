@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -55,7 +57,7 @@ public class IndividualRequestController {
 			Authentication x = SecurityContextHolder.getContext().getAuthentication();
 			user=s.createQuery("FROM User WHERE username = :username", User.class)
 					.setParameter("username", x.getName()).getSingleResult();
-			/*Account account = new Account();
+			Account account = new Account();
 			account =user.getAccounts().stream().filter(
 					ac->ac.getAccountNumber().equals(request.getParameter("accountid") ) &&
 					!ac.getAccountType().equalsIgnoreCase("CrediCard")).findFirst().get();
@@ -72,8 +74,8 @@ public class IndividualRequestController {
 			}
 			else {
 				model.addAttribute("balance", account.getCurrentBalance());
-			}*/
-			model.addAttribute("accountid",request.getParameter("accountid"));
+			}
+			//model.addAttribute("accountid",request.getParameter("accountid"));
 			model.addAttribute("user",user.getUserDetail().getFirstName()+ " "+ user.getUserDetail().getLastName());
 		
 		s.close();
@@ -99,19 +101,16 @@ public class IndividualRequestController {
 			Authentication x = SecurityContextHolder.getContext().getAuthentication();
 			user=s.createQuery("FROM User WHERE username = :username", User.class)
 					.setParameter("username", x.getName()).getSingleResult();	
-			//Account accounts  = user.getAccounts().stream()
-			//	.filter(a->a.getAccountNumber().equals(request.getParameter("accountid")) && a.getStatus()==1).findFirst().get();
-			Account account = new Account();
-			account.setAccountNumber("1111111");
-			account.setInterest(new BigDecimal("1.25"));
-			account.setAccountType("checkings");
-			account.setCurrentBalance(new BigDecimal("10000"));
+			Account account  = user.getAccounts().stream()
+			.filter(a->a.getAccountNumber().equals(request.getParameter("accountid")) && a.getStatus()==1).findFirst().get();
+			
 			model.addAttribute("balance",account.getCurrentBalance());
 			model.addAttribute("accountid",account.getAccountNumber());
 			session.setAttribute("SelectedAccount", account.getAccountNumber());
+			System.out.print("setting session"+session.getAttribute("SelectedAccount"));
 			if(account.getAccountType().equals("checking"))model.addAttribute("accType","checking");
 			if(account.getAccountType().equals("savings"))model.addAttribute("accType","savings");
-			s.close();
+			
 			return new ModelAndView(("accounts/DepositWithdrawal"), model);	
 	}catch(Exception e) {
 		System.out.print(e);
@@ -268,8 +267,9 @@ public class IndividualRequestController {
 			String accountType = request.getParameter("accountType");
 			System.out.print(accountType);
 			Account account = new Account();
-			String Query = "SELECT floor(random()*99999) as numbers where 'numbers' not  in (select accountNumber from Account )";
-			String accountNumber = (String) s.createQuery(Query).getSingleResult();
+			Random random =new Random();
+			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+			String accountNumber = user.getId()+Long.toString(timestamp.getTime())+String.valueOf((random.nextInt(90) + 10));
 			System.out.println(accountNumber);
 			account.setAccountNumber(accountNumber);
 			account.setAccountType(accountType);
@@ -292,7 +292,8 @@ public class IndividualRequestController {
 			account.setStatus(0);
 			account.setUser(user);
 			user.addAccount(account);
-			s.save(user);
+			s.update(user);
+			s.save(account);
 			if (tx.isActive())
 			    tx.commit();
 
@@ -304,27 +305,26 @@ public class IndividualRequestController {
 		}
 	}
 	
-
 	@RequestMapping(value= {"/setprimary"}, method= RequestMethod.POST)
 	public ModelAndView setAccountAsPrimary(HttpServletRequest request, HttpSession session) {
 		try {
 			ModelMap model = new ModelMap();
-			Integer account = Integer.parseInt(request.getParameter("Account"));
+			String account = request.getParameter("Account");
 			Session s = SessionManager.getSession("");
 			User user=null;
 			Authentication x = SecurityContextHolder.getContext().getAuthentication();
 			user=s.createQuery("FROM User WHERE username = :username", User.class)
 					.setParameter("username", x.getName()).getSingleResult();	
-			
+
 			Boolean prime = accountservicesimpl.findAccount(account);
-			
-			if(null!=prime) {
+			System.out.print(prime);
+			if(prime!=false) {
 				if(accountservicesimpl.setPrimaryAccount(account,user)) {
-					return new ModelAndView("/homepage",model);
+					System.out.println("no errors in set primary");
+
+					return new ModelAndView("redirect:/homepage");
 				}
-				else {
-					throw new Exception();
-				}
+				
 			}
 			s.close();
 		}catch(Exception e) {
@@ -338,24 +338,20 @@ public class IndividualRequestController {
 		ModelMap model = new ModelMap();
 		try {
 			Session s = SessionManager.getSession("");
-			List<User> user=null;
+			User user=null;
 			Authentication x = SecurityContextHolder.getContext().getAuthentication();
 			user=s.createQuery("FROM User WHERE username = :username", User.class)
-					.setParameter("username", x.getName()).getResultList();	
+					.setParameter("username", x.getName()).getSingleResult();	
 			
-			 List<Account> account = user.get(0).getAccounts();
-			 List<Integer> accounts = new ArrayList<>();
-			 accounts.add(11111);
-			 accounts.add(11112);
-			 accounts.add(11113);
-
+			 List<Account> account = user.getAccounts();
+			 List<String> accounts = new ArrayList<>();
+			 
 			 for(Account a:account) {
-				 accounts.add(Integer.parseInt(a.getAccountNumber()));
-				 if(a.getDefaultFlag()==1)model.addAttribute("prime_account",Integer.parseInt(a.getAccountNumber()));
+				 if(a.getDefaultFlag()!=1 && !a.getAccountType().equalsIgnoreCase("credit") && a.getStatus()==1) accounts.add(a.getAccountNumber());
+				 if(a.getDefaultFlag()==1)model.addAttribute("prime_account",a.getAccountNumber());
 			 }
-			 model.addAttribute("prime_account",11111);
+
 			 model.addAttribute("accounts",accounts);
-			 System.out.print("here we go" + model.getAttribute("prime_account"));
 			 return new ModelAndView("ServiceRequests/PrimaryAccount",model);
 		}catch(Exception e){
 			return new ModelAndView("Login");

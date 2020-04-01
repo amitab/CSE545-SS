@@ -307,22 +307,20 @@ public class LoginController {
 		user=s.createQuery("FROM User WHERE username = :username", User.class)
 				.setParameter("username", x.getName()).getSingleResult();	
 		List<Account> account = new ArrayList<Account>();
+		List<Account>  checkingAcc =new ArrayList<Account>();
+		List<Account>  SavingAcc =new ArrayList<Account>();
+		List<Account>  Creditcard =new ArrayList<Account>();
 		account = user.getAccounts();
 		for(Account a:account) {
-			if(a.getStatus()!=1)account.remove(a);
+			if(a.getAccountType().equalsIgnoreCase("Savings") && a.getStatus()==1)SavingAcc.add(a);
+			else if(a.getAccountType().equalsIgnoreCase("Checking") && a.getStatus()==1)checkingAcc.add(a);
+			else if(a.getAccountType().equalsIgnoreCase("credit") && a.getStatus()==1)Creditcard.add(a);
 		}
-		Account dummy = new Account();
-		dummy.setAccountNumber("1111111");
-		dummy.setInterest(new BigDecimal("1.25"));
-		dummy.setAccountType("checkings");
-		dummy.setCurrentBalance(new BigDecimal("10000"));
 		
-		account.add(dummy);
 		model.addAttribute("users",x.getName());
-		System.out.print("here we go" + model.getAttribute("users"));
-		model.addAttribute("checking",account);
-		model.addAttribute("savings",account);
-		model.addAttribute("creditcards",account);
+		model.addAttribute("checking",checkingAcc);
+		model.addAttribute("savings",SavingAcc);
+		model.addAttribute("creditcards",Creditcard);
 		model.addAttribute("role",user.getRole());
 		s.close();
 		return "CustomerDashboard";

@@ -50,9 +50,9 @@
 						      <div class="col-lg-5">
 						        <select class="form-control" name="accountType" id="accountType" required>
 						          <option value="">Select Option</option>
-						          <option value="Savings">Savings Account</option>
-						          <option value="CreditCard">Credit Card</option>
-						          <option value="Checking">Checking Account</option>
+						          <option value="savings">Savings Account</option>
+						          <option value="credit">Credit Card</option>
+						          <option value="checking">Checking Account</option>
 						        </select>
 						       </div>
 						     </div>

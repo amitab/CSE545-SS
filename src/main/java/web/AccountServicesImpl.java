@@ -301,7 +301,7 @@ public class AccountServicesImpl {
 		return true;
 	}
 	
-	public Boolean findAccount(int accountNumber) {
+	public Boolean findAccount(String accountNumber) {
 		Session s = SessionManager.getSession("");
 		Transaction tx = null;
 		tx = s.beginTransaction();
@@ -321,7 +321,7 @@ public class AccountServicesImpl {
 		return true;
 	}
 
-	public boolean setPrimaryAccount(Integer accountnumber, User user) {
+	public boolean setPrimaryAccount(String account, User user) {
 		
 		Session s = SessionManager.getSession("");
 		Transaction tx = null;
@@ -329,11 +329,19 @@ public class AccountServicesImpl {
 		try {
 			List<Account> useraccounts = user.getAccounts();
 			for(Account ua:useraccounts) {
-				if(Integer.parseInt(ua.getAccountNumber())==accountnumber) ua.setDefaultFlag(1);
-				else if(ua.getDefaultFlag()==1)ua.setDefaultFlag(0);
-				s.update(useraccounts);
+				if(ua.getAccountNumber().equalsIgnoreCase(account)) {
+					ua.setDefaultFlag(1);
+					s.update(ua);
+
+				}
+				else if(ua.getDefaultFlag()==1) {
+					ua.setDefaultFlag(0);
+					s.update(ua);
+
+				}
 			}
 		}catch (Exception e){
+			e.printStackTrace();
 			return false;
 		}
 		if (tx.isActive())
