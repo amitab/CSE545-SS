@@ -105,6 +105,17 @@ CREATE TABLE `secure_banking_system`.`otp` (
   FOREIGN KEY (initator) REFERENCES `secure_banking_system`.`user`(id)
 );
 
+
+CREATE TABLE `secure_banking_system`.`cashierscheck` (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  from_account_number VARCHAR(255) NOT NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(255) NOT NULL,
+  middle_name VARCHAR(255),
+  transaction_status VARCHAR(100),
+  deposit_amount DECIMAL(30, 5) NOT NULL
+);
+
 DELIMITER $$
 
 CREATE PROCEDURE `secure_banking_system`.`create_user_transaction` (
