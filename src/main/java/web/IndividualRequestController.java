@@ -216,7 +216,8 @@ public class IndividualRequestController {
 			@RequestParam(required = true, name="from_account") String account,
 			@RequestParam(required = true, name="amount") BigDecimal amount){
 
-		if (!transactionservicesimpl.issueCheque(amount, account)) {
+		Integer checkId = transactionservicesimpl.issueCheque(amount, account);
+		if (checkId == 0) {
 			request.getSession().setAttribute("message", "Unable to Issue Cashier's Cheque.");
 			return new ModelAndView("redirect:/CashiersCheck");
 		}

@@ -513,7 +513,7 @@ public class TransactionServicesImpl {
 							.setParameter("fromAccount", accountnumber).setParameter("customerApproval", 0).getResultList();
 					List<TransactionSearch> transactionSearch = transactions.stream()
 //			            .filter(t -> currentSessionUser.equals(Constants.TIER1) ? t.getAmount().compareTo(Constants.THRESHOLD_AMOUNT) == -1 : true)
-			              .map(temp -> new TransactionSearch(temp.getId(), temp.getFromAccount(), temp.getToAccount(), temp.getAmount()))
+			              .map(temp -> new TransactionSearch(temp.getId(), temp.getFromAccount(), temp.getToAccount(), temp.getAmount(), temp.getTransactionType()))
 			              .collect(Collectors.toList());
 					
 					transactionSearchForm.setTransactionSearches(transactionSearch);
