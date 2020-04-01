@@ -1,7 +1,6 @@
 package web;
 
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
+import javax.persistence.NoResultException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -26,8 +27,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 import database.SessionManager;
+import forms.TransactionSearch;
 import forms.TransactionSearchForm;
 import model.Account;
+import model.Transaction;
 import model.User;
 @Controller
 public class IndividualRequestController {
@@ -61,10 +64,25 @@ public class IndividualRequestController {
 			account =user.getAccounts().stream().filter(
 					ac->ac.getAccountNumber().equals(request.getParameter("accountid") ) &&
 					!ac.getAccountType().equalsIgnoreCase("CrediCard")).findFirst().get();
-			List<Transaction> transactions = new ArrayList<>();
-					s.createQuery("FROM Transaction WHERE fromAccount = :fromAccount and approved = true", Transaction.class)
-					.setParameter("fromAccount", account.getAccountNumber()).getResultList();
-			model.addAttribute("transaction", transactions);
+			
+			List<Transaction> transactions  = null;
+			TransactionSearchForm transactionSearchForm = new TransactionSearchForm();
+			
+			try{
+				transactions = s.createQuery("FROM Transaction WHERE (from_account = :from_account or to_account = :to_account) and approval_status = :approval_status", Transaction.class)
+					.setParameter("from_account", account.getAccountNumber()).setParameter("to_account", account.getAccountNumber()).setParameter("approval_status", true).getResultList();
+			
+			}catch(NoResultException e){
+				e.printStackTrace();
+			}
+			
+			List<TransactionSearch> transactionSearch = transactions.stream()
+	              .map(temp -> new TransactionSearch(temp.getId(), temp.getFromAccount(), temp.getToAccount(), temp.getAmount(), temp.getTransactionType()))
+	              .collect(Collectors.toList());
+			
+			transactionSearchForm.setTransactionSearches(transactionSearch);
+			model.addAttribute("transactionSearchForm", transactionSearchForm);
+			
 			model.addAttribute("accountid",request.getParameter("accountid"));
 			if(account.getAccountType().equalsIgnoreCase("Savings"))model.addAttribute("accountType","Savings Account");
 			if(account.getAccountType().equalsIgnoreCase("Checking"))model.addAttribute("accountType","Checking Account");
@@ -256,7 +274,7 @@ public class IndividualRequestController {
 	@RequestMapping(value= {"/opennewaccount"}, method = RequestMethod.POST)
 	public ModelAndView openNewAccount(HttpServletRequest request, HttpSession session){
 		Session s = SessionManager.getSession("");
-		Transaction tx = null;
+		org.hibernate.Transaction tx = null;
 		try {
 			tx = s.beginTransaction();
 			User user=null;
