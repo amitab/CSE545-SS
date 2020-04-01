@@ -38,11 +38,13 @@ public class TransactionServicesImpl {
 		List<Transaction> transactions = null;
 		
 		try {
+			// Tier 1 and Tier 2 can only see transactions approved by customer
 			transactions = session
 				.createNamedQuery("Transaction.findPendingByCriticality", Transaction.class)
 				.setParameter("is_critical_transaction", currentSessionUser.equals(Constants.TIER2))
 				.getResultList();
 		} catch(NoResultException e) {
+			session.close();
 			return null;
 		}
 
@@ -53,6 +55,8 @@ public class TransactionServicesImpl {
               .collect(Collectors.toList());
 		
 		transactionSearchForm.setTransactionSearches(transactionSearch);
+		session.close();
+
 		return transactionSearchForm;			
 	}
 	
@@ -92,6 +96,7 @@ public class TransactionServicesImpl {
 		} catch (Exception e) {
 			if (txn != null && txn.isActive()) txn.rollback();
 			e.printStackTrace();
+			session.close();
 			return false;
 		} finally {
 			session.close();
@@ -100,6 +105,7 @@ public class TransactionServicesImpl {
 		return true;
 	}
 
+	// Any employee has full power to decline transactions
 	public Boolean declineTransactions(Integer transactionId) {
 		String currentSessionUser = WebSecurityConfig
 		  .getCurrentSessionAuthority()
@@ -132,6 +138,7 @@ public class TransactionServicesImpl {
 		} catch (Exception e) {
 			if(txn != null && txn.isActive()) txn.rollback();
 			e.printStackTrace();
+			session.close();
 			return false;
 		} finally {
 			session.close();
@@ -173,6 +180,7 @@ public class TransactionServicesImpl {
 		} catch (Exception e) {
 			if(txn != null && txn.isActive()) txn.rollback();
 			e.printStackTrace();
+			session.close();
 			return false;
 		} finally {
 			session.close();
@@ -214,6 +222,7 @@ public class TransactionServicesImpl {
 		} catch (Exception e) {
 			if(txn != null && txn.isActive()) txn.rollback();
 			e.printStackTrace();
+			session.close();
 			return false;
 		} finally {
 			session.close();
@@ -260,6 +269,7 @@ public class TransactionServicesImpl {
 		} catch (Exception e) {
 			if(txn != null && txn.isActive()) txn.rollback();
 			e.printStackTrace();
+			session.close();
 			return false;
 		} finally {
 			session.close();
@@ -300,6 +310,7 @@ public class TransactionServicesImpl {
 		} catch (Exception e) {
 			if(txn != null && txn.isActive()) txn.rollback();
 			e.printStackTrace();
+			session.close();
 			return false;
 		} finally {
 			session.close();
@@ -373,13 +384,21 @@ public class TransactionServicesImpl {
 			throw new Exception("Not enough funds.");
 		}
 		
-		transaction.setLevel1Approval(currentSessionUser.equals(Constants.TIER1));
-		transaction.setCustomerApproval(currentSessionUser.equals(Constants.CUSTOMER) ? 1 : 0);
+		if (currentSessionUser.equals(Constants.TIER1)) {
+			transaction.setLevel1Approval(true);
+		} else if (currentSessionUser.equals(Constants.CUSTOMER)) {
+			transaction.setCustomerApproval(1);
+		} else if (currentSessionUser.equals(Constants.TIER2)) {
+			transaction.setLevel2Approval(true);
+		}
 
-		if ((currentSessionUser.equals(Constants.TIER1) && !transaction.getIsCriticalTransaction()) ||
-			currentSessionUser.equals(Constants.TIER2)) {
-
-			transaction.setLevel2Approval(currentSessionUser.equals(Constants.TIER2));
+		// Tier 1 can execute a transaction if not critical & has customer approval
+		// Tier 2 can execute a transaction if critical & has customer approval
+		// Customer can execute a transaction if not critical and has tier1 approval
+		if ((currentSessionUser.equals(Constants.TIER1) && !transaction.getIsCriticalTransaction() && transaction.getCustomerApproval() == 1) ||
+			(currentSessionUser.equals(Constants.CUSTOMER) && !transaction.getIsCriticalTransaction() && transaction.getLevel1Approval()) ||
+			(currentSessionUser.equals(Constants.TIER2) && transaction.getIsCriticalTransaction() && transaction.getCustomerApproval() == 1)
+		   ) {
 			
 			if (from != null)
 				from.setCurrentBalance(from.getCurrentBalance().subtract(transaction.getAmount()));
@@ -457,9 +476,11 @@ public class TransactionServicesImpl {
 				.setParameter("transaction_type", transactionType)
 				.getSingleResult();
 		} catch (NoResultException e) {
+			session.close();
 			return false;
 		}
 
+		session.close();
 		return true;
 	}
 
@@ -495,83 +516,91 @@ public class TransactionServicesImpl {
 		}
 		}
 
-	public TransactionSearchForm getPendingTransactionsUser() {
-		Session s = SessionManager.getSession("");
-				User user = null;
-				Authentication x = SecurityContextHolder.getContext().getAuthentication();
-				user=s.createQuery("FROM User WHERE username = :username", User.class)
-						.setParameter("username", x.getName()).getSingleResult();
-				List<Transaction> transactions = null;
-				List<Account> account = user.getAccounts();
-				List<String> accountnumber = new ArrayList<String>();
-				TransactionSearchForm transactionSearchForm = new TransactionSearchForm();
-				for(Account a:account) {
-					if(a.getStatus()==1)accountnumber.add(a.getAccountNumber());
-				}
-				try {
-					transactions = s.createQuery("FROM Transaction WHERE fromAccount = : fromAccount AND customerApproval = : customerApproval", Transaction.class)
-							.setParameter("fromAccount", accountnumber).setParameter("customerApproval", 0).getResultList();
-					List<TransactionSearch> transactionSearch = transactions.stream()
-//			            .filter(t -> currentSessionUser.equals(Constants.TIER1) ? t.getAmount().compareTo(Constants.THRESHOLD_AMOUNT) == -1 : true)
-			              .map(temp -> new TransactionSearch(temp.getId(), temp.getFromAccount(), temp.getToAccount(), temp.getAmount(), temp.getTransactionType()))
-			              .collect(Collectors.toList());
-					
-					transactionSearchForm.setTransactionSearches(transactionSearch);
-				} catch(NoResultException e) {
-					System.out.print("exception in fucntion"+e);
-					return null;
-				}
+	public TransactionSearchForm getPendingTransactionsUser(User user) {
+		String currentSessionUser = WebSecurityConfig
+		  .getCurrentSessionAuthority()
+		  .filter(a -> a.equals(Constants.CUSTOMER))
+		  .findFirst().orElse(null);
 
-				
-				return transactionSearchForm;
+		if (currentSessionUser == null)
+		  return null;
+
+		Session session = SessionManager.getSession(currentSessionUser);
+		List<Transaction> transactions = null;
+		
+		try {
+			transactions = session.createQuery("FROM Transaction WHERE from_account IN (SELECT a.accountNumber FROM Account a WHERE user_id = :user_id) AND customerApproval = :customerApproval AND decision_date IS NULL", Transaction.class)
+					.setParameter("user_id", user.getId())
+					.setParameter("customerApproval", 0).getResultList();
+		} catch(NoResultException e) {
+			return null;
+		}
+
+		session.close();
+
+		TransactionSearchForm transactionSearchForm = new TransactionSearchForm();
+		List<TransactionSearch> transactionSearch = transactions.stream()
+              .map(temp -> new TransactionSearch(temp.getId(), temp.getFromAccount(), temp.getToAccount(), temp.getAmount(), temp.getTransactionType()))
+              .collect(Collectors.toList());
+		
+		transactionSearchForm.setTransactionSearches(transactionSearch);
+		return transactionSearchForm;
 	}
 
-	public boolean approveTransactionsUser(Integer transactionId) {
+	public Boolean approveDeclineTransactionsUser(User user, Integer transactionId, Boolean customerApproval) {
+		String currentSessionUser = WebSecurityConfig
+		  .getCurrentSessionAuthority()
+		  .filter(a -> a.equals(Constants.CUSTOMER))
+		  .findFirst().orElse(null);
+
+		if (currentSessionUser == null)
+		  return false;
+		
 		Session s = SessionManager.getSession("");
-				org.hibernate.Transaction txn = null;
+		org.hibernate.Transaction txn = null;
+		
+		try {
+			txn = s.beginTransaction();
+
+			Transaction transaction = s.createQuery("FROM Transaction WHERE id = :id AND from_account IN (SELECT a.accountNumber FROM Account a WHERE user_id = :user_id) AND decision_date IS NULL", Transaction.class)
+					.setParameter("id", transactionId)
+					.setParameter("user_id", user.getId())
+					.getSingleResult();
+
+			if (customerApproval) {
 				
-				try {
-					txn = s.beginTransaction();
-
-					Transaction transaction = s.get(Transaction.class, transactionId);
-
-					transaction.setCustomerApproval(1);
-					s.update(transaction);
-					if (txn.isActive()) txn.commit();
-
-				} catch (Exception e) {
-					if (txn != null && txn.isActive()) txn.rollback();
-					e.printStackTrace();
-					return false;
-				} finally {
-					s.close();
+				Account to = null, from = null;
+				if (transaction.getToAccount() != null)
+					to = getAccountByNumber(transaction.getToAccount(), s);
+				if (transaction.getFromAccount() != null)
+					from = getAccountByNumber(transaction.getFromAccount(), s);
+				
+				// If this is not a critical transaction and from account has enough funds
+				// The transaction will be executed
+				if (applyTransaction(from, to, transaction, currentSessionUser)) {
+					s.update(from);
+					s.update(to);
 				}
 
-				return true;
-	}
+			} else {
+				transaction.setCustomerApproval(2);
+				transaction.setDecisionDate(new Date());
+				transaction.setApprovalStatus(customerApproval);
+			}
+			
+			s.update(transaction);
+			if (txn.isActive()) txn.commit();
 
-	public boolean declineTransactionsUser(int transactionId) {
-		Session s = SessionManager.getSession("");
-				org.hibernate.Transaction txn = null;
-				
-				try {
-					txn = s.beginTransaction();
+		} catch (Exception e) {
+			if (txn != null && txn.isActive()) txn.rollback();
+			s.close();
+			e.printStackTrace();
+			return false;
+		} finally {
+			s.close();
+		}
 
-					Transaction transaction = s.get(Transaction.class, transactionId);
-
-					transaction.setCustomerApproval(2);
-					s.update(transaction);
-					if (txn.isActive()) txn.commit();
-
-				} catch (Exception e) {
-					if (txn != null && txn.isActive()) txn.rollback();
-					e.printStackTrace();
-					return false;
-				} finally {
-					s.close();
-				}
-
-				return true;
+		return true;
 	}
 	
 	

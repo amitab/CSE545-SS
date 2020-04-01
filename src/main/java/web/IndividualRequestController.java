@@ -26,6 +26,7 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
+import bankApp.repositories.UserDetailsImpl;
 import database.SessionManager;
 import forms.TransactionSearch;
 import forms.TransactionSearchForm;
@@ -147,27 +148,32 @@ public class IndividualRequestController {
 	
 	@RequestMapping(value = "/PendingTransactions",method = { RequestMethod.GET, RequestMethod.POST })
 	public String PendingTransactions(HttpServletRequest request, Model model) {
-		String message = getMessageFromSession("message", request.getSession());
-		try {
-		TransactionSearchForm transactionSearchForm =transactionservicesimpl.getPendingTransactionsUser();
-		if (null!=transactionSearchForm )
-			model.addAttribute("transactionSearchForm", transactionSearchForm);
-		else
-			model.addAttribute("message", "No pending transactions found.");
-		if (message != null)
-			model.addAttribute("message", message);
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
 
-		return "PendingTransactions";}
-		catch(Exception e) {
-	System.out.println("controller"+e);
-		return "Login";
-		}
+        TransactionSearchForm transactionSearchForm = transactionservicesimpl.getPendingTransactionsUser(user);
+        if (transactionSearchForm != null) {
+			model.addAttribute("transactionSearchForm", transactionSearchForm);
+        } else {
+			model.addAttribute("message", "No pending transactions found.");
+        }
+
+        return "PendingTransactions";
 	}
 	
 	@RequestMapping(value = "/AuthorizeTransaction", method = RequestMethod.POST)
-    public ModelAndView AuthorizeTransaction(HttpServletRequest request, @RequestParam(required = true, name="id") int id, @RequestParam(required = true, name="fromAccountNumber") String fromAccountNumber, @RequestParam(required = true, name="toAccountNumber") String toAccountNumber, @RequestParam(required = true, name="id") BigDecimal amount) throws ParseException {		
-		if(transactionservicesimpl.approveTransactionsUser(id))
+    public ModelAndView AuthorizeTransaction(HttpServletRequest request,
+    		@RequestParam(required = true, name="id") int transactionId,
+    		@RequestParam(required = true, name="fromAccountNumber") String fromAccountNumber,
+    		@RequestParam(required = true, name="toAccountNumber") String toAccountNumber,
+    		@RequestParam(required = true, name="amount") BigDecimal amount) throws ParseException {		
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+		
+		if(transactionservicesimpl.approveDeclineTransactionsUser(user, transactionId, true)) {
+			request.getSession().setAttribute("message", "Transaction approved.");
 			return new ModelAndView("redirect:/PendingTransactions");  
+		}
 		
 		request.getSession().setAttribute("message", "Transaction can't be approved");
 		return new ModelAndView("redirect:/PendingTransactions");
@@ -175,11 +181,18 @@ public class IndividualRequestController {
     }
 	
 	@RequestMapping(value = "/DeclineTransaction", method = RequestMethod.POST)
-    public ModelAndView DeclineTransaction(HttpServletRequest request, @RequestParam(required = true, name="id") int id, @RequestParam(required = true, name="fromAccountNumber") String fromAccountNumber, @RequestParam(required = true, name="toAccountNumber") String toAccountNumber, @RequestParam(required = true, name="id") BigDecimal amount) throws ParseException {
-		if(transactionservicesimpl.declineTransactionsUser(id))
-			return new ModelAndView("redirect:/PendingTransactions");  
+    public ModelAndView DeclineTransaction(HttpServletRequest request,
+    		@RequestParam(required = true, name="id") int transactionId,
+    		@RequestParam(required = true, name="fromAccountNumber") String fromAccountNumber,
+    		@RequestParam(required = true, name="toAccountNumber") String toAccountNumber,
+    		@RequestParam(required = true, name="amount") BigDecimal amount) throws ParseException {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
 		
-		request.getSession().setAttribute("message", "Transaction doesn't exist");
+		if(transactionservicesimpl.approveDeclineTransactionsUser(user, transactionId, false))
+			return new ModelAndView("redirect:/PendingTransactions");  
+
+		request.getSession().setAttribute("message", "Transaction can't be declined");
 		return new ModelAndView("redirect:/PendingTransactions");
     }
 	
