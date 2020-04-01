@@ -167,7 +167,6 @@ public class PaymentsController {
 	@RequestMapping(value= {"/paymentactioncc"}, method = RequestMethod.POST)
     public ModelAndView paymentactionCCard(HttpServletRequest request, HttpSession session) throws Exception {
 		ModelMap model = new ModelMap();
-		System.out.print("goes in2");
 		String amount = request.getParameter("Amount").toString();
 		String FromAcc =session.getAttribute("SelectedAccount").toString();
 		String ToAcc = request.getParameter("Account");
@@ -191,10 +190,10 @@ public class PaymentsController {
 				transfer = transactionservicesimpl.creditcardtransfer(FromAcc,ToAcc,amount);
 			}
 			if(transfer)return new ModelAndView("redirect:/homepage");
+			else return new ModelAndView("error");
 		}catch(Exception e) {
-			return new ModelAndView("Login");
+			return new ModelAndView("error");
 		}
-		return new ModelAndView("Login");
 	}
 	
 }
