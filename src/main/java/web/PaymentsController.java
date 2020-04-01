@@ -163,7 +163,7 @@ public class PaymentsController {
 		return new ModelAndView("redirect:/homepage");
 	}
 	
-	@RequestMapping(value= {"/paymentactionemph"}, method = RequestMethod.POST)
+	@RequestMapping(value= {"/paymentactioncc"}, method = RequestMethod.POST)
     public ModelAndView paymentactionCCard(HttpServletRequest request, HttpSession session) throws Exception {
 		ModelMap model = new ModelMap();
 		String amount = request.getParameter("Amount").toString();

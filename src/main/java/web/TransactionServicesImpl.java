@@ -271,7 +271,7 @@ public class TransactionServicesImpl {
 	public Boolean depositCheque(int chequeId, BigDecimal amount, String accountNumber) {
 		String currentSessionUser = WebSecurityConfig
 		  .getCurrentSessionAuthority()
-		  .filter(a -> a.equals(Constants.TIER1) || a.equals(Constants.TIER2))
+		  .filter(a -> a.equals(Constants.TIER1) || a.equals(Constants.TIER2) || a.equals(Constants.CUSTOMER))
 		  .findFirst().orElse(null);
 
 		if (currentSessionUser == null)
@@ -285,7 +285,7 @@ public class TransactionServicesImpl {
 			
 			Transaction transaction = session.get(Transaction.class, chequeId);
 			
-			if (transaction.getAmount().compareTo(amount) != 0)
+			if ((amount != null && transaction.getAmount().compareTo(amount) != 0) || !transaction.getApprovalStatus())
 				throw new Exception("Invalid Cheque Deposit request!");
 			
 			Transaction depositTransaction = createTransaction(null, accountNumber, transaction.getAmount(), Constants.CHEQUE);
@@ -374,6 +374,8 @@ public class TransactionServicesImpl {
 		}
 		
 		transaction.setLevel1Approval(currentSessionUser.equals(Constants.TIER1));
+		transaction.setCustomerApproval(currentSessionUser.equals(Constants.CUSTOMER) ? 1 : 0);
+
 		if ((currentSessionUser.equals(Constants.TIER1) && !transaction.getIsCriticalTransaction()) ||
 			currentSessionUser.equals(Constants.TIER2)) {
 
@@ -397,7 +399,7 @@ public class TransactionServicesImpl {
 	public int issueCheque(BigDecimal amount, String accountNumber) {
 		String currentSessionUser = WebSecurityConfig
 		  .getCurrentSessionAuthority()
-		  .filter(a -> a.equals(Constants.TIER1) || a.equals(Constants.TIER2))
+		  .filter(a -> a.equals(Constants.TIER1) || a.equals(Constants.TIER2) || a.equals(Constants.CUSTOMER))
 		  .findFirst().orElse(null);
 
 		int count = 0;

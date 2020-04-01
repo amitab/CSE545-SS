@@ -169,6 +169,15 @@ public class IndividualRequestController {
 	@RequestMapping(value="/CashiersCheck", method=RequestMethod.GET)
 	public ModelAndView CashiersCheck(HttpServletRequest request, HttpSession session){
 		ModelMap model = new ModelMap();
+		
+	    if (session != null) {
+		    Object msg = session.getAttribute("message");
+	        if (msg != null) {
+		        model.addAttribute("message", msg);
+	        	session.removeAttribute("message");
+	        }
+	    }
+		
 		try {
 			Session s = SessionManager.getSession("");
 			List<User> user=null;
@@ -180,7 +189,7 @@ public class IndividualRequestController {
 			 List<String> accounts = new ArrayList<>();
 			 accounts.add("Lets go!!");
 			 for(Account a:account) {
-				 accounts.add(a.getAccountType());
+				 accounts.add(a.getAccountNumber());
 			 }
 			 model.addAttribute("accounts",accounts);
 			 s.close();
@@ -189,8 +198,8 @@ public class IndividualRequestController {
 			return new ModelAndView("Login");
 		}
 
-		return new ModelAndView(("ServiceRequests/CashiersCheckOrder"), model);
-		}
+		return new ModelAndView("ServiceRequests/CashiersCheckOrder", model);
+	}
 
 	@RequestMapping(value="/updateAccInfo", method = RequestMethod.POST)
 	public ModelAndView transactions(HttpServletRequest request, HttpSession session) {
@@ -200,75 +209,34 @@ public class IndividualRequestController {
 	}
 	
 	@RequestMapping(value= {"/CCheckOrderAction"}, method = RequestMethod.POST)
-	public ModelAndView ccheckOrderAction(HttpServletRequest request, HttpSession session){
-		ModelMap model = new ModelMap();
-		String firstname = (String)request.getParameter("Recipeint First Name");
-		String middlename = null;
-		if(!"".equals(middlename))middlename =(String)request.getParameter("Recipeint Middle Name");
-		String lastname = (String)request.getParameter("Recipeint Last Name");
-		String account = (String)request.getParameter("Account");
-		String amountinString = (String)request.getParameter("amount");
-		BigDecimal amount = new BigDecimal(amountinString);
-		Optional<Account> AccountExists;
-		boolean ordered =false;
-		try {
-			Session s = SessionManager.getSession("");
-			User user=null;
-			Authentication x = SecurityContextHolder.getContext().getAuthentication();
-			user=s.createQuery("FROM User WHERE username = :username", User.class)
-					.setParameter("username", x.getName()).getSingleResult();
-			AccountExists = user.getAccounts().parallelStream().distinct().filter(a->
-			{if(a.getAccountNumber().equals(account) && a.getAccountType().equalsIgnoreCase("CreditCard"))
-				return true;
-			else return false;}).findFirst();
-			
-			
-			if(AccountExists.isPresent() && Integer.parseInt(amountinString)>0) {
-				ordered =cashierscheckservices.orderCashiersCheck(firstname,middlename,lastname,amount,AccountExists.get());
-				
-			}
-			if(!ordered) {
-				request.getSession().setAttribute("message", "cannot do it");
-				return new ModelAndView("redirect:ServiceRequests/CashiersCheckOrder");			}
-				
-		}catch(Exception e) {
-			return new ModelAndView("Login");
+	public ModelAndView ccheckOrderAction(HttpServletRequest request, HttpSession session,
+			@RequestParam(required = true, name="rec_first_name") String recFirstName,
+			@RequestParam(required = false, name="rec_middle_name") String recMiddleName,
+			@RequestParam(required = true, name="rec_last_name") String recLastName,
+			@RequestParam(required = true, name="from_account") String account,
+			@RequestParam(required = true, name="amount") BigDecimal amount){
+
+		if (!transactionservicesimpl.issueCheque(amount, account)) {
+			request.getSession().setAttribute("message", "Unable to Issue Cashier's Cheque.");
+			return new ModelAndView("redirect:/CashiersCheck");
 		}
-		
-		return new ModelAndView(("redirect:/accinfo"), model);
+
+		request.getSession().setAttribute("message", "Cashier's Cheque Issue pending approval.");
+		return new ModelAndView("redirect:/CashiersCheck");
 	}
 	
 	@RequestMapping(value= {"/ccheckDepositAction"}, method = RequestMethod.POST)
-	public ModelAndView ccheckDepositAction(HttpServletRequest request, HttpSession session) {
-		ModelMap model = new ModelMap();
-		String checknumber = (String)request.getParameter("Cashier's Check Number");
-		String accountnumber = (String)request.getParameter("Account");
-		Optional<Account> AccountExists;
-		boolean deposited =false;
-		try {
-			Session s = SessionManager.getSession("");
-			User user=null;
-			Authentication x = SecurityContextHolder.getContext().getAuthentication();
-			user=s.createQuery("FROM User WHERE username = :username", User.class)
-					.setParameter("username", x.getName()).getSingleResult();
-			AccountExists = user.getAccounts().parallelStream().distinct().filter(a->
-			{if(a.getAccountNumber().equals(accountnumber) && a.getAccountType().equalsIgnoreCase("CreditCard"))
-				return true;
-			else return false;}).findFirst();
-			
-			if(AccountExists.isPresent()) {
-				deposited = cashierscheckservices.depositCashiersCheck(user.getUserDetail().getFirstName(),user.getUserDetail().getMiddleName(),user.getUserDetail().getLastName(),checknumber,AccountExists.get());
-				
-			}
-			if(!deposited) {
-				request.getSession().setAttribute("message", "chequeNumber doesnt exist");
-				return new ModelAndView("redirect:ServiceRequests/CashiersCheckOrder");
-			}
-		}catch(Exception e) {
-			return new ModelAndView("Login");
+	public ModelAndView ccheckDepositAction(HttpServletRequest request, HttpSession session,
+			@RequestParam(required = true, name="check_number") Integer checkNumber,
+			@RequestParam(required = false, name="to_account") String toAccount) {
+		if (!transactionservicesimpl.depositCheque(checkNumber, null, toAccount)) {
+			request.getSession().setAttribute("message", "Unable to Deposit Cashier's Cheque.");
+			return new ModelAndView("redirect:/CashiersCheck");
 		}
-		return new ModelAndView(("redirect:/accinfo"), model);
-		}
+
+		request.getSession().setAttribute("message", "Cashier's Cheque Deposit pending approval.");
+		return new ModelAndView("redirect:/CashiersCheck");
+	}
 	
 	@RequestMapping(value= {"/OpenAccount"}, method = RequestMethod.POST)
 	public ModelAndView openAccountAfterOtp(HttpServletRequest request, HttpSession session){
