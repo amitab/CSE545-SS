@@ -113,12 +113,12 @@
 										</div>
 
 										<div class="input-group mb-3">
-											<label>Phone Number</label> <input type="tel"
-												oninvalid="this.setCustomValidity('Must be a 10 digit number')"
-												pattern="^(\+?1-?)?(\([2-9]([02-9]\d|1[02-9])\)|[2-9]([02-9]\d|1[02-9]))-?[2-9]\d{2}-?\d{4}$" class="form-control"
-												placeholder="Recipient Phone Number"
+											<label>Phone Number</label> 
+											<input type="text"
 												name="phone"
-												aria-describedby="basic-addon2">
+												pattern="(\+?1-?)?(\([2-9]([02-9]\d|1[02-9])\)|[2-9]([02-9]\d|1[02-9]))-?[2-9]\d{2}-?\d{4}"
+												title="Recipients's valid US Phone number +1XXXXXXXXXX"
+												class="form-control" />
 										</div>
 
 										<div class="input-group mb-3">
@@ -130,7 +130,7 @@
 										<div class="input-group">
 											<input type="hidden" name="${_csrf.parameterName}"
 												value="${_csrf.token}" /> <input type="submit"
-												onclick="return validate();" class="btn btn-success"
+												 class="btn btn-success"
 												value="Transfer">
 										</div>
 									</form>
