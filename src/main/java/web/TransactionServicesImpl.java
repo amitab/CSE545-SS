@@ -165,15 +165,10 @@ public class TransactionServicesImpl {
 			
 			Transaction transaction = createTransaction(null, accountNumber, amount, Constants.CREDIT);
 			
-			session.save(transaction);
-			if (txn.isActive()) txn.commit();
-			
-			txn = session.beginTransaction();
-			
 			Account to = getAccountByNumber(accountNumber, session);
 			if (applyTransaction(null, to, transaction, currentSessionUser))
 				session.update(to);
-			session.update(transaction);
+			session.save(transaction);
 
 			if (txn.isActive()) txn.commit();
 			
@@ -207,15 +202,10 @@ public class TransactionServicesImpl {
 			
 			Transaction transaction = createTransaction(accountNumber, null, amount, Constants.DEBIT);
 			
-			session.save(transaction);
-			if (txn.isActive()) txn.commit();
-			
-			txn = session.beginTransaction();
-			
 			Account from = getAccountByNumber(accountNumber, session);
 			if (applyTransaction(from, null, transaction, currentSessionUser))
 				session.update(from);
-			session.update(transaction);
+			session.save(transaction);
 			
 			if (txn.isActive()) txn.commit();
 			
@@ -249,11 +239,6 @@ public class TransactionServicesImpl {
 			txn = session.beginTransaction();
 			
 			Transaction transaction = createTransaction(fromAccountNumber, toAccountNumber, amount, Constants.TRANSFER);
-			
-			session.save(transaction);
-			if (txn.isActive()) txn.commit();
-			
-			txn = session.beginTransaction();
 
 			Account to   = getAccountByNumber(toAccountNumber, session),
 					from = getAccountByNumber(fromAccountNumber, session);
@@ -262,8 +247,8 @@ public class TransactionServicesImpl {
 				session.update(to);
 				session.update(from);
 			}
-			session.update(transaction);
-			
+
+			session.save(transaction);
 			if (txn.isActive()) txn.commit();
 			
 		} catch (Exception e) {
@@ -375,6 +360,10 @@ public class TransactionServicesImpl {
 	private Boolean applyTransaction(Account from, Account to, Transaction transaction, String currentSessionUser) throws Exception {
 		if (from != null && from.getCurrentBalance().compareTo(transaction.getAmount()) == -1) {
 			throw new Exception("Not enough funds.");
+		}
+		
+		if (from.getStatus() != 1 || to.getStatus() != 1) {
+			throw new Exception("Account is frozen.");
 		}
 		
 		if (currentSessionUser.equals(Constants.TIER1)) {
@@ -524,7 +513,7 @@ public class TransactionServicesImpl {
 		List<Transaction> transactions = null;
 		
 		try {
-			transactions = session.createQuery("FROM Transaction WHERE from_account IN (SELECT a.accountNumber FROM Account a WHERE user_id = :user_id) AND customerApproval = :customerApproval AND decision_date IS NULL", Transaction.class)
+			transactions = session.createQuery("FROM Transaction WHERE from_account IN (SELECT a.accountNumber FROM Account a WHERE user_id = :user_id AND status = 1) AND customerApproval = :customerApproval AND decision_date IS NULL", Transaction.class)
 					.setParameter("user_id", user.getId())
 					.setParameter("customerApproval", 0).getResultList();
 		} catch(NoResultException e) {
