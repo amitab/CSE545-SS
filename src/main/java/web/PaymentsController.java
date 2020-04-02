@@ -1,12 +1,7 @@
 package web;
 
-import javax.persistence.ParameterMode;
-
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.procedure.ProcedureCall;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,27 +10,131 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
+
+import bankApp.repositories.UserDetailsImpl;
 import database.SessionManager;
 import model.Account;
 import model.User;
+
+
 @Controller
 public class PaymentsController {
 	AccountServicesImpl accountservicesimpl = new AccountServicesImpl();
 	TransactionServicesImpl transactionservicesimpl = new TransactionServicesImpl();
-	@RequestMapping(value= {"/payments"}, method = RequestMethod.POST)
-	public ModelAndView payments(HttpServletRequest request, HttpSession session){
-		session = request.getSession(false);
-		ModelMap model = new ModelMap();
-			return new ModelAndView(("accounts/Payments"), model);
+
+	@RequestMapping(value="/payments", method = RequestMethod.POST)
+	public ModelAndView payments(HttpServletRequest request, HttpSession session,
+    		@RequestParam(required = true, name="accountid") String accountNumber){
+		session.setAttribute("accountNumber", accountNumber);
+		return new ModelAndView("redirect:/payments_page");
+	}
+
+	@RequestMapping(value= {"/payments_page"}, method = RequestMethod.GET)
+	public ModelAndView paymentsPage(HttpServletRequest request, HttpSession session){
+		Object data = session.getAttribute("accountNumber");
+		System.out.println("DATA " + (String) data);
+		
+		if (data == null || !(data instanceof String)) {
+			System.out.println("Moving back, didnt find");
+			return new ModelAndView("redirect:/homepage");
+		}
+		
+		String accNumber = (String) data;
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+        
+        ModelAndView response = new ModelAndView();
+		ModelMap model = response.getModelMap();
+
+        if (session != null) {
+            Object msg = session.getAttribute("message");
+            model.addAttribute("message", session.getAttribute("message"));
+            if (msg != null)
+                session.removeAttribute("message");
+        }
+
+        Session s = SessionManager.getSession("");
+        try {
+        	
+        	Account acc = s.createQuery("FROM Account WHERE account_number = :account_number AND status = 1 AND user_id = :user_id", Account.class)
+        		.setParameter("account_number", accNumber)
+        		.setParameter("user_id", user.getId())
+        		.getSingleResult();
+        	
+        	model.put("acctype", acc.getAccountType());
+        	model.put("accountid", acc.getAccountNumber());
+        	model.put("balance", acc.getCurrentBalance());
+
+        	response.setViewName("accounts/Payments");
+        } catch (Exception e) {
+			System.out.println("Moving back, error");
+        	e.printStackTrace();
+        	response.getModelMap().clear();
+        	response.setViewName("redirect:/homepage");
+        } finally {
+        	s.close();
+        }
+		
+		return response;
 	}
 	
+	@RequestMapping(value= {"/payment/transfer"}, method = RequestMethod.POST)
+    public ModelAndView paymentTransfer(HttpServletRequest request, HttpSession session,
+    		@RequestParam(required = true, name="to_acc_number") String toAccountNumber,
+    		@RequestParam(required = true, name="rec_last_name") String recipientLastName,
+    		@RequestParam(required = true, name="amount") BigDecimal amount) throws Exception {
+		Object data = session.getAttribute("accountNumber");
+		if (data == null || !(data instanceof String)) {
+			return new ModelAndView("redirect:/homepage");
+		}
+		
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+		
+        ModelAndView resp = new ModelAndView("redirect:/payments_page");
+		if (!transactionservicesimpl.transferToAccountByUser(user, (String) data, toAccountNumber, amount)) {
+			session.setAttribute("message", "Transfer successful!");
+		} else {
+			session.setAttribute("message", "Transfer not successful!");
+		}
+
+		return resp;
+	}
+
+	@RequestMapping(value= {"/payment/transfer_by_default"}, method = RequestMethod.POST)
+    public ModelAndView paymentTransferByEmailOrPhone(HttpServletRequest request, HttpSession session,
+    		@RequestParam(required = false, name="email") String email,
+    		@RequestParam(required = false, name="phone") String phone,
+    		@RequestParam(required = true, name="amount") BigDecimal amount) throws Exception {
+		Object data = session.getAttribute("accountNumber");
+		if (data == null || !(data instanceof String)) {
+			return new ModelAndView("redirect:/homepage");
+		}
+		
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userDetails.getUser();
+
+        ModelAndView resp = new ModelAndView("redirect:/payments_page");
+        
+        if ((email == null || email.isEmpty()) && (phone == null || phone.isEmpty())) {
+			session.setAttribute("message", "Unable to locate the target account!");
+			return resp;
+        }
+        
+		if (transactionservicesimpl.transferToAccountByUserDefaults(user, (String) data, email, phone, amount)) {
+			session.setAttribute("message", "Transfer successful!");
+		} else {
+			session.setAttribute("message", "Transfer not successful!");
+		}
+
+		return resp;
+	}
 	
 	@RequestMapping(value= {"/paymentactionacc"}, method = RequestMethod.POST)
     public ModelAndView paymentactionacc(HttpServletRequest request, HttpSession session) throws Exception {

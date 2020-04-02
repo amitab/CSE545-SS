@@ -14,7 +14,7 @@ import java.util.Date;
 @Table(name="transaction",schema = "secure_banking_system")
 @NamedQuery(name="Transaction.findAll", query="SELECT t FROM Transaction t")
 @NamedQuery(name="Transaction.findPendingByCriticality",
-      query="SELECT t FROM Transaction t WHERE is_critical_transaction = :is_critical_transaction AND decision_date IS NULL AND approval_status = 0 AND customer_approval = 0")
+      query="SELECT t FROM Transaction t WHERE is_critical_transaction = :is_critical_transaction AND decision_date IS NULL AND approval_status = 0 AND customer_approval = 1")
 public class Transaction implements Serializable {
 	private static final long serialVersionUID = 1L;
 

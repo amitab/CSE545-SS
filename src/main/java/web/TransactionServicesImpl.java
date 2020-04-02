@@ -353,30 +353,23 @@ public class TransactionServicesImpl {
 			.getSingleResult();
 	}
 	
-	private Account getAccountByPhoneNumber(String Phno, Session session) {
-		
-		UserDetail ud =  session.createQuery("FROM UserDetail WHERE phone = :phone", UserDetail.class)
-				.setParameter("phone", Phno).getSingleResult();	
-		
-		List<Account> accounts =ud.getUser().getAccounts();
-		for(Account a:accounts) {
-			if(a.getDefaultFlag()==1) return a;
-		}
-		return null;
-		
+	private Account getUserAccountByNumber(User user, String accountNumber, Session session) {
+		return session.createQuery("FROM Account WHERE account_number = :number AND status = 1 AND user_id = :user_id", Account.class)
+			.setParameter("number", accountNumber)
+			.setParameter("user_id", user.getId())
+			.getSingleResult();
 	}
-	
+
 	private Account getAccountByEmailID(String email, Session session) {
-		
-		UserDetail ud =  session.createQuery("FROM UserDetail WHERE email = :email", UserDetail.class)
-				.setParameter("email", email).getSingleResult();	
-		
-		List<Account> accounts =ud.getUser().getAccounts();
-		for(Account a:accounts) {
-			if(a.getDefaultFlag()==1) return a;
-		}
-		return null;
-		
+		return session.createQuery("FROM Account WHERE default_flag = 1 AND user_id = (SELECT u.userId FROM UserDetail u WHERE email = :email)", Account.class)
+				.setParameter("email", email)
+				.getSingleResult();
+	}
+
+	private Account getAccountByPhoneNumber(String phone, Session session) {
+		return session.createQuery("FROM Account WHERE default_flag = 1 AND user_id = (SELECT u.userId FROM UserDetail u WHERE phone = :phone)", Account.class)
+				.setParameter("phone", phone)
+				.getSingleResult();
 	}
 	
 	private Boolean applyTransaction(Account from, Account to, Transaction transaction, String currentSessionUser) throws Exception {
@@ -392,11 +385,13 @@ public class TransactionServicesImpl {
 			transaction.setLevel2Approval(true);
 		}
 
+		System.out.println(transaction);
+		
 		// Tier 1 can execute a transaction if not critical & has customer approval
 		// Tier 2 can execute a transaction if critical & has customer approval
-		// Customer can execute a transaction if not critical and has tier1 approval
+		// Customer can execute a transaction if not critical
 		if ((currentSessionUser.equals(Constants.TIER1) && !transaction.getIsCriticalTransaction() && transaction.getCustomerApproval() == 1) ||
-			(currentSessionUser.equals(Constants.CUSTOMER) && !transaction.getIsCriticalTransaction() && transaction.getLevel1Approval()) ||
+			(currentSessionUser.equals(Constants.CUSTOMER) && !transaction.getIsCriticalTransaction()) ||
 			(currentSessionUser.equals(Constants.TIER2) && transaction.getIsCriticalTransaction() && transaction.getCustomerApproval() == 1)
 		   ) {
 			
@@ -659,6 +654,90 @@ public class TransactionServicesImpl {
 		return true;
 	}
 
+	public Boolean transferToAccountByUserDefaults(User user, String fromAccount, String email, String phone, BigDecimal amount) {
+		String currentSessionUser = WebSecurityConfig
+		  .getCurrentSessionAuthority()
+		  .filter(a -> a.equals(Constants.CUSTOMER))
+		  .findFirst().orElse(null);
+
+		if (currentSessionUser == null)
+		  return false;
+		
+		Session s = SessionManager.getSession("");
+		org.hibernate.Transaction txn = null;
+		try {
+			txn = s.beginTransaction();
+			
+			Account from = getUserAccountByNumber(user, fromAccount, s);
+			Account to = null;
+			if (email != null && !email.trim().isEmpty()) {
+				to = getAccountByEmailID(email, s);
+			} else if (phone != null && !phone.trim().isEmpty()) {
+				to = getAccountByPhoneNumber(phone, s);
+			} else {
+				throw new Exception("Email or Phone is required to do a default transfer.");
+			}
+
+			System.out.println("GOT TO ACCOUNT: " + to.getAccountNumber());
+			
+			Transaction t = createTransaction(fromAccount, to.getAccountNumber(), amount, Constants.TRANSFER);
+			if (applyTransaction(from, to, t, currentSessionUser)) {
+				s.update(from);
+				s.update(to);
+			}
+			
+			s.save(t);
+			if (txn.isActive()) txn.commit();
+		} catch (Exception e) {
+			if(txn != null && txn.isActive()) txn.rollback();
+			e.printStackTrace();
+			s.close();
+			return false;
+		} finally {
+			s.close();
+		}
+		
+		return true;
+	}
+	
+	public Boolean transferToAccountByUser(User user, String fromAccount, String toAccount, BigDecimal amount) {
+		String currentSessionUser = WebSecurityConfig
+		  .getCurrentSessionAuthority()
+		  .filter(a -> a.equals(Constants.CUSTOMER))
+		  .findFirst().orElse(null);
+
+		if (currentSessionUser == null)
+		  return false;
+		
+		Session s = SessionManager.getSession("");
+		org.hibernate.Transaction txn = null;
+		try {
+			txn = s.beginTransaction();
+			
+			Account from = getUserAccountByNumber(user, fromAccount, s);
+			Account to   = getAccountByNumber(toAccount, s);
+			
+			Transaction t = createTransaction(fromAccount, toAccount, amount, Constants.TRANSFER);
+			
+			if (applyTransaction(from, to, t, currentSessionUser)) {
+				s.update(from);
+				s.update(to);
+			}
+			
+			s.save(t);
+			if (txn.isActive()) txn.commit();
+		} catch (Exception e) {
+			if(txn != null && txn.isActive()) txn.rollback();
+			e.printStackTrace();
+			s.close();
+			return false;
+		} finally {
+			s.close();
+		}
+		
+		return true;
+	}
+	
 	public boolean trasactionAcc(String payeracc, String recipientaccnum, BigDecimal amount) {
 		Session s = SessionManager.getSession("");
 		org.hibernate.Transaction txn = null;
