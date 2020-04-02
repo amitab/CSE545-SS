@@ -143,9 +143,10 @@ public class LoginController {
 			    		
 			    		if (mode == 1) {
 				    		System.out.println("Sending Email...");
+				    		String link = appUrl + "/reset_password?token=" + otp.getOtpKey();
 					    	mailer.sendEmail(details.getEmail(),
 					    			"BigPPBank: Your link to reset your password.",
-					    			appUrl + "/reset_password?token=" + otp.getOtpKey());
+					    			"<h3>Please use the otp to reset your password<br><a href='" + link + "'>" + link + "</a></h3>");
 			    		} else if (mode == 0) {
 				    		System.out.println("Sending Message...");
 				    		messager.sendSms(details.getPhone(), otp.getOtpKey());
@@ -299,7 +300,15 @@ public class LoginController {
 
 	@RequestMapping("/homepage")
     public String home(final HttpServletRequest request, Model model) {
-		
+	    HttpSession session = request.getSession(false);
+	    
+        if (session != null) {
+            Object msg = session.getAttribute("message");
+            model.addAttribute("message", (String) msg);
+            if (msg != null)
+                session.removeAttribute("message");
+        }
+
 		Authentication x = SecurityContextHolder.getContext().getAuthentication();
 		System.out.println(x.getName());
 		Session s = SessionManager.getSession("");

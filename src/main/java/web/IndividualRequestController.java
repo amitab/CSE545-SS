@@ -279,25 +279,31 @@ public class IndividualRequestController {
 	
 	@RequestMapping(value= {"/OpenAccount"}, method = RequestMethod.POST)
 	public ModelAndView openAccountAfterOtp(HttpServletRequest request, HttpSession session){
+		Object validOtp = session.getAttribute("OtpValid");
+		if (validOtp == null || !(validOtp instanceof Integer)) {
+			return new ModelAndView("redirect:/homepage"); 
+		}
 
 		ModelMap model = new ModelMap();
 		try {
-			if(null==session.getAttribute("OtpValid")) {		
-				return new ModelAndView("redirect:/login");
-			}
-			session.setAttribute("OtpValid", null);
-		return new ModelAndView(("NewAccount"), model);
+			return new ModelAndView(("NewAccount"), model);
 		}catch(Exception e) {
-			return new ModelAndView("Login");
+			return new ModelAndView("error");
 		}
 	}
 	
 	@RequestMapping(value= {"/opennewaccount"}, method = RequestMethod.POST)
 	public ModelAndView openNewAccount(HttpServletRequest request, HttpSession session){
+		Object validOtp = session.getAttribute("OtpValid");
+		if (validOtp == null || !(validOtp instanceof Integer)) {
+			return new ModelAndView("redirect:/homepage"); 
+		}
+		
 		Session s = SessionManager.getSession("");
 		org.hibernate.Transaction tx = null;
 		try {
 			tx = s.beginTransaction();
+			
 			User user=null;
 			Authentication x = SecurityContextHolder.getContext().getAuthentication();
 			user=s.createQuery("FROM User WHERE username = :username", User.class)
@@ -336,11 +342,13 @@ public class IndividualRequestController {
 			if (tx.isActive())
 			    tx.commit();
 
+			session.removeAttribute("OtpValid");
+			session.setAttribute("message", "Account creation pending by Bank Employees.");
 			return new ModelAndView("redirect:/homepage");
-			
-		}catch(Exception e) {
-			System.out.print(e);
-			return new ModelAndView("Login");
+		} catch(Exception e) {
+			e.printStackTrace();
+			session.removeAttribute("OtpValid");
+			return new ModelAndView("error");
 		}
 	}
 	

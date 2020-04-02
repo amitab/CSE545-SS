@@ -52,7 +52,7 @@
 								type="hidden" />
 
 						</div>
-						<div class="col-md-5 col-xs-5 col-sm-5"></div>
+						<div class="col-md-5 col-xs-5 col-sm-5">${ message }</div>
 					</div>
 				</fieldset>
 			</form>

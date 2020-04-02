@@ -73,7 +73,7 @@ CREATE TABLE `secure_banking_system`.`appointment` (
   appointment_user_id INT NOT NULL,
   assigned_to_user_id INT NOT NULL,
   created_date DATETIME NOT NULL DEFAULT NOW(),
-  appointment_status VARCHAR(25) NOT NULL,
+  appointment_status VARCHAR(255) NOT NULL,
   FOREIGN KEY (appointment_user_id) REFERENCES `secure_banking_system`.`user`(id),
   FOREIGN KEY (assigned_to_user_id) REFERENCES `secure_banking_system`.`user`(id)
 );

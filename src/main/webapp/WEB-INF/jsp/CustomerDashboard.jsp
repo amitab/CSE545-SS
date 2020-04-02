@@ -17,6 +17,7 @@
 	<div class="content-container">
 		<div class="accounts-container cards">
 			<div>Hello ${users}!</div>
+			<p>${ message }</p>
 			<label>Accounts</label>
 			<c:forEach var="entry" items="${savings}">
 				<div class="account-detail cards">
