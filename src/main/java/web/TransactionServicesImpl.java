@@ -362,7 +362,7 @@ public class TransactionServicesImpl {
 			throw new Exception("Not enough funds.");
 		}
 		
-		if (from.getStatus() != 1 || to.getStatus() != 1) {
+		if ((from != null && from.getStatus() != 1) || (to != null && to.getStatus() != 1)) {
 			throw new Exception("Account is frozen.");
 		}
 		
