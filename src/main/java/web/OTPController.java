@@ -36,6 +36,19 @@ public class OTPController {
 	public ModelAndView generateLoginOtp(HttpServletRequest request, HttpSession session){
 		ModelMap model = new ModelMap();
 		Authentication x = SecurityContextHolder.getContext().getAuthentication();
+		
+		Object validOtp = session.getAttribute("OtpValid");
+		if (validOtp != null && (validOtp instanceof Integer)) {
+			model.put("message", "Please wait for 5 minutes before requesting another OTP.");
+			return new ModelAndView("OtpPage", model);
+		}
+		
+		Integer oldOtp = otpservice.getOTP(x.getName());
+
+		if (oldOtp != null && oldOtp != 0) {
+			model.put("message", "Please wait for 5 minutes before requesting another OTP.");
+			return new ModelAndView("OtpPage", model);
+		}
 
 		Integer otp = otpservice.generateNewOTP(x.getName());
 		System.out.print("otp"+ otp);
@@ -68,6 +81,19 @@ public class OTPController {
 	public ModelAndView generateAppointment(HttpServletRequest request, HttpSession session){
 		ModelMap model = new ModelMap();
 		Authentication x = SecurityContextHolder.getContext().getAuthentication();
+		
+		Object validOtp = session.getAttribute("OtpValid");
+		if (validOtp != null && (validOtp instanceof Integer)) {
+			model.put("message", "Please wait for 5 minutes before requesting another OTP.");
+			return new ModelAndView("OtpPage", model);
+		}
+		
+		Integer oldOtp = otpservice.getOTP(x.getName());
+
+		if (oldOtp != null && oldOtp != 0) {
+			model.put("message", "Please wait for 5 minutes before requesting another OTP.");
+			return new ModelAndView("OtpPageForAppointment", model);
+		}
 
 		Integer otp = otpservice.generateNewOTP(x.getName());
 		System.out.print("otp"+ otp);
