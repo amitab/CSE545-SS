@@ -166,6 +166,8 @@ public class TransactionServicesImpl {
 			Transaction transaction = createTransaction(null, accountNumber, amount, Constants.CREDIT);
 			
 			Account to = getAccountByNumber(accountNumber, session);
+			transaction.setCustomerApproval(1);
+
 			if (applyTransaction(null, to, transaction, currentSessionUser))
 				session.update(to);
 			session.save(transaction);
@@ -285,6 +287,7 @@ public class TransactionServicesImpl {
 			
 			Transaction depositTransaction = createTransaction(null, accountNumber, transaction.getAmount(), Constants.CHEQUE);
 			Account to = getAccountByNumber(accountNumber, session);
+			depositTransaction.setCustomerApproval(1);
 
 			if (applyTransaction(null, to, depositTransaction, currentSessionUser))
 				session.update(to);
