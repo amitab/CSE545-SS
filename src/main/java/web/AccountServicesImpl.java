@@ -334,7 +334,7 @@ public class AccountServicesImpl {
 					s.update(ua);
 
 				}
-				else if(ua.getDefaultFlag()==1) {
+				else if(ua.getDefaultFlag() != null && ua.getDefaultFlag() == 1) {
 					ua.setDefaultFlag(0);
 					s.update(ua);
 

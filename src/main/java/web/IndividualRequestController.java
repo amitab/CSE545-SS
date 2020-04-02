@@ -321,11 +321,11 @@ public class IndividualRequestController {
 			account.setApprovalDate(date);
 			account.setCreatedDate(date);
 			
-			if(accountType.equals("Savings")) {
+			if(accountType.equals("savings")) {
 			account.setInterest(new BigDecimal(0.0));
 			account.setCurrentBalance(new BigDecimal(5.0));
 			}
-			else if(accountType.equals("Checking"))  {
+			else if(accountType.equals("checking"))  {
 				account.setInterest(new BigDecimal(0.0));
 				account.setCurrentBalance(new BigDecimal(5.0));
 			}
@@ -343,7 +343,7 @@ public class IndividualRequestController {
 			    tx.commit();
 
 			session.removeAttribute("OtpValid");
-			session.setAttribute("message", "Account creation pending by Bank Employees.");
+			session.setAttribute("message", "Account approval pending by Bank Employees.");
 			return new ModelAndView("redirect:/homepage");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -367,8 +367,7 @@ public class IndividualRequestController {
 			System.out.print(prime);
 			if(prime!=false) {
 				if(accountservicesimpl.setPrimaryAccount(account,user)) {
-					System.out.println("no errors in set primary");
-
+					session.setAttribute("message", "Primary account successfully changed!");
 					return new ModelAndView("redirect:/homepage");
 				}
 				
@@ -394,13 +393,19 @@ public class IndividualRequestController {
 			 List<String> accounts = new ArrayList<>();
 			 
 			 for(Account a:account) {
-				 if(a.getDefaultFlag()!=1 && !a.getAccountType().equalsIgnoreCase("credit") && a.getStatus()==1) accounts.add(a.getAccountNumber());
-				 if(a.getDefaultFlag()==1)model.addAttribute("prime_account",a.getAccountNumber());
+				 if (a.getStatus() != 1) continue;
+				 
+				 if ((a.getDefaultFlag() == null || a.getDefaultFlag() != 1) && !a.getAccountType().equalsIgnoreCase("credit"))
+					 accounts.add(a.getAccountNumber());
+				 
+				 if (a.getDefaultFlag() != null && a.getDefaultFlag() == 1)
+					 model.addAttribute("prime_account", a.getAccountNumber());
 			 }
 
 			 model.addAttribute("accounts",accounts);
 			 return new ModelAndView("ServiceRequests/PrimaryAccount",model);
 		}catch(Exception e){
+			e.printStackTrace();
 			return new ModelAndView("Login");
 		}
 		
