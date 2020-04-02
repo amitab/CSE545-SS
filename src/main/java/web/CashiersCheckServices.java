@@ -27,7 +27,7 @@ public class CashiersCheckServices {
 		transaction.setTransactionType(type);
 		transaction.setCustomerApproval(1);
 
-		if (amount.compareTo(Constants.THRESHOLD_AMOUNT) <= 0) {
+		if (amount.compareTo(Constants.THRESHOLD_AMOUNT) < 0) {
 			transaction.setIsCriticalTransaction(false);
 			transaction.setRequestAssignedTo(Constants.DEFAULT_TIER1);
 			transaction.setApprovalLevelRequired(Constants.TIER1);

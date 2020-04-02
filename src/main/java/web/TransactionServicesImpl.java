@@ -370,7 +370,7 @@ public class TransactionServicesImpl {
 			transaction.setCustomerApproval(0);
 		}
 
-		if (amount.compareTo(Constants.THRESHOLD_AMOUNT) <= 0) {
+		if (amount.compareTo(Constants.THRESHOLD_AMOUNT) < 0) {
 			transaction.setIsCriticalTransaction(false);
 			transaction.setRequestAssignedTo(Constants.DEFAULT_TIER1);
 			transaction.setApprovalLevelRequired(Constants.TIER1);
@@ -791,13 +791,13 @@ public class TransactionServicesImpl {
 			s.save(transaction);
 				//create transaction object
 				if (txn.isActive()) txn.commit();
+				s.close();
 				return true;
 		} catch (Exception e) {
-		if(txn != null && txn.isActive()) txn.rollback();
-		e.printStackTrace();
-		return false;
-		} finally {
-		s.close();
+			if(txn != null && txn.isActive()) txn.rollback();
+			e.printStackTrace();
+			s.close();
+			return false;
 		}
 	}
 
@@ -809,14 +809,14 @@ public class TransactionServicesImpl {
 			Transaction transaction = createTransaction(fromAcc, toAcc, new BigDecimal(amount), Constants.CREDITCARD);
 			s.save(transaction);
 			if (txn.isActive()) txn.commit();
+			s.close();
 			return true;
 	}catch(Exception e) {
 		if(txn != null && txn.isActive()) txn.rollback();
 		e.printStackTrace();
-		return false;
-	} finally {
 		s.close();
-		}
+		return false;
+	}
 
 	}
 	

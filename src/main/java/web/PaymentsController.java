@@ -1,20 +1,19 @@
 package web;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.hibernate.Session;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.math.BigDecimal;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 import bankApp.repositories.UserDetailsImpl;
@@ -98,7 +97,7 @@ public class PaymentsController {
         User user = userDetails.getUser();
 		
         ModelAndView resp = new ModelAndView("redirect:/payments_page");
-		if (!transactionservicesimpl.transferToAccountByUser(user, (String) data, toAccountNumber, amount)) {
+		if (transactionservicesimpl.transferToAccountByUser(user, (String) data, toAccountNumber, amount)) {
 			session.setAttribute("message", "Transfer successful!");
 		} else {
 			session.setAttribute("message", "Transfer not successful!");
@@ -157,7 +156,7 @@ public class PaymentsController {
 			user=s.createQuery("FROM User WHERE username = :username", User.class)
 					.setParameter("username", x.getName()).getSingleResult();
 			accountExists = user.getAccounts().stream().distinct().anyMatch(f->{
-				if(f.getAccountNumber().equals(payeracc) && !f.getAccountType().contentEquals("CreditCard"))
+				if(f.getAccountNumber().equals(payeracc) && !f.getAccountType().contentEquals("credit"))
 						return true;
 				else 
 							return false;
@@ -208,7 +207,7 @@ public class PaymentsController {
 		user=s.createQuery("FROM User WHERE username = :username", User.class)
 				.setParameter("username", x.getName()).getSingleResult();	
 		isPresent = user.getAccounts().stream().distinct().anyMatch(f->{
-			if(f.getAccountNumber().equals(payeracc) && !f.getAccountType().contentEquals("CreditCard"))
+			if(f.getAccountNumber().equals(payeracc) && !f.getAccountType().contentEquals("credit"))
 					return true;
 			else 
 						return false;
