@@ -64,7 +64,7 @@ public class Transaction implements Serializable {
 	
 	//0 for not asked 1 for authorised 2 for declined
 	@Column(name="customer_approval")
-	private int customerApproval;
+	private Integer customerApproval;
 
 	public Transaction() {
 	}
