@@ -27,6 +27,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 import bankApp.repositories.UserDetailsImpl;
+import constants.Constants;
 import database.SessionManager;
 import forms.TransactionSearch;
 import forms.TransactionSearchForm;
@@ -252,7 +253,10 @@ public class IndividualRequestController {
 			return new ModelAndView("redirect:/CashiersCheck");
 		}
 
-		request.getSession().setAttribute("message", "Cashier's Cheque Issue pending approval.");
+		request.getSession().setAttribute("message", 
+				amount.compareTo(Constants.THRESHOLD_AMOUNT) > 0 ?
+						"Cashier's Cheque Issue pending approval. Cheque ID: " + checkId :
+						"Cashier's Check Issued! Cheque ID: " + checkId);
 		return new ModelAndView("redirect:/CashiersCheck");
 	}
 	
@@ -260,12 +264,16 @@ public class IndividualRequestController {
 	public ModelAndView ccheckDepositAction(HttpServletRequest request, HttpSession session,
 			@RequestParam(required = true, name="check_number") Integer checkNumber,
 			@RequestParam(required = false, name="to_account") String toAccount) {
-		if (!transactionservicesimpl.depositCheque(checkNumber, null, toAccount)) {
+		BigDecimal value = transactionservicesimpl.depositCheque(checkNumber, toAccount);
+		if (value == null) {
 			request.getSession().setAttribute("message", "Unable to Deposit Cashier's Cheque.");
 			return new ModelAndView("redirect:/CashiersCheck");
 		}
 
-		request.getSession().setAttribute("message", "Cashier's Cheque Deposit pending approval.");
+		request.getSession().setAttribute("message", 
+				value.compareTo(Constants.THRESHOLD_AMOUNT) > 0 ?
+						"Cashier's Cheque Deposit pending approval." :
+						"Cashier's Cheque Deposit complete!");
 		return new ModelAndView("redirect:/CashiersCheck");
 	}
 	

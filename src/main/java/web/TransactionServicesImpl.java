@@ -166,7 +166,6 @@ public class TransactionServicesImpl {
 			Transaction transaction = createTransaction(null, accountNumber, amount, Constants.CREDIT);
 			
 			Account to = getAccountByNumber(accountNumber, session);
-			transaction.setCustomerApproval(1);
 
 			if (applyTransaction(null, to, transaction, currentSessionUser))
 				session.update(to);
@@ -265,6 +264,51 @@ public class TransactionServicesImpl {
 		return true;
 	}
 
+	public BigDecimal depositCheque(int chequeId, String accountNumber) {
+		String currentSessionUser = WebSecurityConfig
+		  .getCurrentSessionAuthority()
+		  .filter(a -> a.equals(Constants.CUSTOMER))
+		  .findFirst().orElse(null);
+
+		if (currentSessionUser == null)
+		  return null;
+
+		Session session = SessionManager.getSession(currentSessionUser);
+		org.hibernate.Transaction txn = null;
+		
+		BigDecimal value = null;
+		
+		try {
+			txn = session.beginTransaction();
+			
+			Transaction transaction = session.get(Transaction.class, chequeId);
+			
+			if (!transaction.getApprovalStatus())
+				throw new Exception("Invalid Cheque Deposit request!");
+			
+			Transaction depositTransaction = createTransaction(null, accountNumber, transaction.getAmount(), Constants.CHEQUE);
+			Account to = getAccountByNumber(accountNumber, session);
+
+			if (applyTransaction(null, to, depositTransaction, currentSessionUser))
+				session.update(to);
+			session.save(depositTransaction);
+			
+			if (txn.isActive()) txn.commit();
+			
+			value = transaction.getAmount();
+			
+		} catch (Exception e) {
+			if(txn != null && txn.isActive()) txn.rollback();
+			e.printStackTrace();
+			session.close();
+			return null;
+		} finally {
+			session.close();
+		}
+		
+		return value;
+	}
+	
 	public Boolean depositCheque(int chequeId, BigDecimal amount, String accountNumber) {
 		String currentSessionUser = WebSecurityConfig
 		  .getCurrentSessionAuthority()
@@ -287,7 +331,6 @@ public class TransactionServicesImpl {
 			
 			Transaction depositTransaction = createTransaction(null, accountNumber, transaction.getAmount(), Constants.CHEQUE);
 			Account to = getAccountByNumber(accountNumber, session);
-			depositTransaction.setCustomerApproval(1);
 
 			if (applyTransaction(null, to, depositTransaction, currentSessionUser))
 				session.update(to);
@@ -320,7 +363,12 @@ public class TransactionServicesImpl {
 		transaction.setDecisionDate(null);
 		transaction.setRequestedDate(new Date());
 		transaction.setTransactionType(type);
-		transaction.setCustomerApproval(0);
+		
+		if ((type.equals(Constants.CHEQUE) || type.equals(Constants.CREDIT)) && from == null) {
+			transaction.setCustomerApproval(1);
+		} else {
+			transaction.setCustomerApproval(0);
+		}
 
 		if (amount.compareTo(Constants.THRESHOLD_AMOUNT) <= 0) {
 			transaction.setIsCriticalTransaction(false);
