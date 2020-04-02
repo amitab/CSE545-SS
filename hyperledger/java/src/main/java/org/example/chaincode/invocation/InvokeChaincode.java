@@ -45,7 +45,7 @@ public class InvokeChaincode {
 			String myDriver = "com.mysql.jdbc.Driver";
 	        String myUrl = "jdbc:mysql://localhost:3306/secure_banking_system";
 	        Class.forName(myDriver);
-			java.sql.Connection conn = DriverManager.getConnection(myUrl, "root", "ASUSpring_20");
+			java.sql.Connection conn = DriverManager.getConnection(myUrl, "admin", "xyz");
 			Statement st = conn.createStatement();
 		
 			try {
@@ -73,7 +73,7 @@ public class InvokeChaincode {
 				channel.initialize();
 				
 		        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		        String query = "select id, decision_date, from_account, to_account, amount, transaction_type from Transaction where TIMESTAMPDIFF(MINUTE,decision_date,NOW()) < 15 and approval_status = 1";
+		        String query = "select id, decision_date, from_account, to_account, amount, transaction_type from transaction where TIMESTAMPDIFF(MINUTE,decision_date,NOW()) < 15 and approval_status = 1";
 		        ResultSet rs = st.executeQuery(query);
 		        if(rs!=null) {
 		        	while(rs.next()) {
