@@ -31,7 +31,7 @@ public final class Constants {
     public static final BigDecimal THRESHOLD_AMOUNT = BigDecimal.valueOf(1000);
 
 
-    public static final String userNamePattern = "^[^!@#~$%^&*\\\\(\\\\)-\\\\+=\\\\[\\\\]\\\\{\\\\};:'\\\"<>,/\\\\?`].+{5,}$";
+    public static final String userNamePattern = "[^!@#~$%^&*\\(\\)-\\+=\\[\\]\\{\\};:'\\\"\\<\\>,\\/\\?`]{5,}$";
     public static final String userNameErrorMessage = "Username cannot contain special characters. It can only contain alphabets, numbers, underscores and periods.";
 
     public static final String phoneNumberPattern = "^(\\+?1-?)?(\\([2-9]([02-9]\\d|1[02-9])\\)|[2-9]([02-9]\\d|1[02-9]))-?[2-9]\\d{2}-?\\d{4}$";

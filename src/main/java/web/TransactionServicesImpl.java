@@ -614,8 +614,10 @@ public class TransactionServicesImpl {
 				// If this is not a critical transaction and from account has enough funds
 				// The transaction will be executed
 				if (applyTransaction(from, to, transaction, currentSessionUser)) {
-					s.update(from);
-					s.update(to);
+					if (from != null)
+						s.update(from);
+					if (to != null)
+						s.update(to);
 				}
 
 			} else {
